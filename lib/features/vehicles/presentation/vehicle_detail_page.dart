@@ -6,31 +6,55 @@ import '../../../core/models/vehicle_event.dart';
 import '../../../core/utils/formatters.dart';
 import '../../dashboard/presentation/widgets/event_tile.dart';
 import '../../records/presentation/event_actions.dart';
+import 'vehicle_entry_sheet.dart';
 
-class VehicleDetailPage extends StatelessWidget {
+class VehicleDetailPage extends StatefulWidget {
   const VehicleDetailPage({
     super.key,
     required this.vehicle,
     required this.events,
+    required this.onVehicleSaved,
     required this.onEventSaved,
     required this.onEventDeleted,
   });
 
   final Vehicle vehicle;
   final List<VehicleEvent> events;
+  final ValueChanged<Vehicle> onVehicleSaved;
   final ValueChanged<VehicleEvent> onEventSaved;
   final ValueChanged<VehicleEvent> onEventDeleted;
 
   @override
+  State<VehicleDetailPage> createState() => _VehicleDetailPageState();
+}
+
+class _VehicleDetailPageState extends State<VehicleDetailPage> {
+  late Vehicle _vehicle;
+
+  @override
+  void initState() {
+    super.initState();
+    _vehicle = widget.vehicle;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final vehicleEvents = events
-        .where((event) => event.vehicleId == vehicle.id)
+    final vehicleEvents = widget.events
+        .where((event) => event.vehicleId == _vehicle.id)
         .toList();
     return Scaffold(
       appBar: AppBar(
-        title: Text(vehicle.displayName),
+        title: Text(_vehicle.displayName),
         backgroundColor: AppColors.background,
         scrolledUnderElevation: 0,
+        actions: [
+          IconButton(
+            onPressed: _editVehicle,
+            tooltip: 'Editar veículo',
+            icon: const Icon(Icons.edit_rounded),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
@@ -38,10 +62,10 @@ class VehicleDetailPage extends StatelessWidget {
           Container(
             height: 190,
             decoration: BoxDecoration(
-              color: Color(vehicle.color),
+              color: Color(_vehicle.color),
               borderRadius: BorderRadius.circular(26),
               gradient: LinearGradient(
-                colors: [Color(vehicle.color), AppColors.blue],
+                colors: [Color(_vehicle.color), AppColors.blue],
               ),
             ),
             child: Column(
@@ -54,7 +78,7 @@ class VehicleDetailPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  vehicle.licensePlate,
+                  _vehicle.licensePlate,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -74,25 +98,27 @@ class VehicleDetailPage extends StatelessWidget {
                   _InfoRow(
                     icon: Icons.speed_rounded,
                     label: 'Quilometragem',
-                    value: Formatters.kilometers(vehicle.mileage),
+                    value: Formatters.kilometers(_vehicle.mileage),
+                    onEdit: _editVehicle,
+                    editTooltip: 'Atualizar quilometragem',
                   ),
                   const Divider(height: 28),
                   _InfoRow(
                     icon: Icons.calendar_month_rounded,
                     label: 'Ano',
-                    value: vehicle.year.toString(),
+                    value: _vehicle.year.toString(),
                   ),
                   const Divider(height: 28),
                   _InfoRow(
                     icon: Icons.person_rounded,
                     label: 'Associado a',
-                    value: vehicle.associationLabel,
+                    value: _vehicle.associationLabel,
                   ),
                   const Divider(height: 28),
                   _InfoRow(
                     icon: Icons.fact_check_rounded,
                     label: 'Próxima inspeção',
-                    value: Formatters.fullDate(vehicle.nextInspection),
+                    value: Formatters.fullDate(_vehicle.nextInspection),
                   ),
                 ],
               ),
@@ -104,34 +130,34 @@ class VehicleDetailPage extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 10),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  for (var i = 0; i < vehicleEvents.length; i++)
-                    EventTile(
-                      event: vehicleEvents[i],
-                      showDivider: i < vehicleEvents.length - 1,
-                      onEdit: () => EventActions.edit(
-                        context,
-                        vehicleEvents[i],
-                        onEventSaved,
-                      ),
-                      onDelete: () => EventActions.delete(
-                        context,
-                        vehicleEvents[i],
-                        onEventDeleted,
-                        onEventSaved,
-                      ),
-                    ),
-                ],
+          if (vehicleEvents.isEmpty)
+            const Card(
+              child: Padding(
+                padding: EdgeInsets.all(22),
+                child: Center(child: Text('Ainda não existem registos.')),
               ),
-            ),
-          ),
+            )
+          else
+            for (final event in vehicleEvents) ...[
+              EventCard(
+                event: event,
+                onEdit: () =>
+                    EventActions.edit(context, event, widget.onEventSaved),
+                onDelete: () =>
+                    EventActions.delete(context, event, widget.onEventDeleted),
+              ),
+              const SizedBox(height: 10),
+            ],
         ],
       ),
     );
+  }
+
+  Future<void> _editVehicle() async {
+    final updated = await VehicleEntrySheet.show(context, existing: _vehicle);
+    if (updated == null || !mounted) return;
+    setState(() => _vehicle = updated);
+    widget.onVehicleSaved(updated);
   }
 }
 
@@ -140,10 +166,14 @@ class _InfoRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    this.onEdit,
+    this.editTooltip,
   });
   final IconData icon;
   final String label;
   final String value;
+  final VoidCallback? onEdit;
+  final String? editTooltip;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -152,6 +182,15 @@ class _InfoRow extends StatelessWidget {
       const SizedBox(width: 12),
       Expanded(child: Text(label)),
       Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
+      if (onEdit != null) ...[
+        const SizedBox(width: 4),
+        IconButton(
+          onPressed: onEdit,
+          tooltip: editTooltip,
+          visualDensity: VisualDensity.compact,
+          icon: const Icon(Icons.edit_rounded, size: 19),
+        ),
+      ],
     ],
   );
 }

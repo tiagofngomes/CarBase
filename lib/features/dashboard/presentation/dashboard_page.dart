@@ -29,6 +29,7 @@ class DashboardPage extends StatefulWidget {
     required this.onInspectionCompleted,
     required this.onEventSaved,
     required this.onEventDeleted,
+    required this.onViewAllEvents,
   });
 
   final String selectedVehicleId;
@@ -55,6 +56,7 @@ class DashboardPage extends StatefulWidget {
   onInspectionCompleted;
   final ValueChanged<VehicleEvent> onEventSaved;
   final ValueChanged<VehicleEvent> onEventDeleted;
+  final VoidCallback onViewAllEvents;
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -160,41 +162,33 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ],
               const SizedBox(height: 24),
-              const SectionHeader(
+              SectionHeader(
                 title: 'Atividade recente',
                 actionLabel: 'Ver tudo',
+                onAction: widget.onViewAllEvents,
               ),
               const SizedBox(height: 8),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: vehicleEvents.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.all(22),
-                          child: Text('Ainda não existem registos.'),
-                        )
-                      : Column(
-                          children: [
-                            for (var i = 0; i < vehicleEvents.length; i++)
-                              EventTile(
-                                event: vehicleEvents[i],
-                                showDivider: i < vehicleEvents.length - 1,
-                                onEdit: () => EventActions.edit(
-                                  context,
-                                  vehicleEvents[i],
-                                  widget.onEventSaved,
-                                ),
-                                onDelete: () => EventActions.delete(
-                                  context,
-                                  vehicleEvents[i],
-                                  widget.onEventDeleted,
-                                  widget.onEventSaved,
-                                ),
-                              ),
-                          ],
-                        ),
-                ),
-              ),
+              if (vehicleEvents.isEmpty)
+                const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(22),
+                    child: Text('Ainda não existem registos.'),
+                  ),
+                )
+              else
+                for (final event in vehicleEvents) ...[
+                  EventCard(
+                    event: event,
+                    onEdit: () =>
+                        EventActions.edit(context, event, widget.onEventSaved),
+                    onDelete: () => EventActions.delete(
+                      context,
+                      event,
+                      widget.onEventDeleted,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
             ],
           ),
         ),

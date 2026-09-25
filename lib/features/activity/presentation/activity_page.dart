@@ -15,12 +15,16 @@ class ActivityPage extends StatefulWidget {
     required this.vehicles,
     required this.onEventSaved,
     required this.onEventDeleted,
+    required this.selectedVehicleId,
+    required this.onVehicleChanged,
   });
 
   final List<VehicleEvent> events;
   final List<Vehicle> vehicles;
   final ValueChanged<VehicleEvent> onEventSaved;
   final ValueChanged<VehicleEvent> onEventDeleted;
+  final String? selectedVehicleId;
+  final ValueChanged<String?> onVehicleChanged;
 
   @override
   State<ActivityPage> createState() => _ActivityPageState();
@@ -28,13 +32,13 @@ class ActivityPage extends StatefulWidget {
 
 class _ActivityPageState extends State<ActivityPage> {
   RecordType? _filter;
-  String? _vehicleId;
 
   @override
   Widget build(BuildContext context) {
     final events = widget.events.where((event) {
       final matchesVehicle =
-          _vehicleId == null || event.vehicleId == _vehicleId;
+          widget.selectedVehicleId == null ||
+          event.vehicleId == widget.selectedVehicleId;
       final matchesType = _filter == null || event.type == _filter;
       return matchesVehicle && matchesType;
     }).toList();
@@ -56,14 +60,14 @@ class _ActivityPageState extends State<ActivityPage> {
             children: [
               _FilterChip(
                 label: 'Todos',
-                selected: _vehicleId == null,
-                onTap: () => setState(() => _vehicleId = null),
+                selected: widget.selectedVehicleId == null,
+                onTap: () => widget.onVehicleChanged(null),
               ),
               for (final vehicle in widget.vehicles)
                 _FilterChip(
                   label: '${vehicle.displayName} · ${vehicle.associationLabel}',
-                  selected: _vehicleId == vehicle.id,
-                  onTap: () => setState(() => _vehicleId = vehicle.id),
+                  selected: widget.selectedVehicleId == vehicle.id,
+                  onTap: () => widget.onVehicleChanged(vehicle.id),
                 ),
             ],
           ),
@@ -114,31 +118,16 @@ class _ActivityPageState extends State<ActivityPage> {
             ),
           )
         else
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  for (var i = 0; i < events.length; i++)
-                    EventTile(
-                      event: events[i],
-                      showDivider: i < events.length - 1,
-                      onEdit: () => EventActions.edit(
-                        context,
-                        events[i],
-                        widget.onEventSaved,
-                      ),
-                      onDelete: () => EventActions.delete(
-                        context,
-                        events[i],
-                        widget.onEventDeleted,
-                        widget.onEventSaved,
-                      ),
-                    ),
-                ],
-              ),
+          for (final event in events) ...[
+            EventCard(
+              event: event,
+              onEdit: () =>
+                  EventActions.edit(context, event, widget.onEventSaved),
+              onDelete: () =>
+                  EventActions.delete(context, event, widget.onEventDeleted),
             ),
-          ),
+            const SizedBox(height: 10),
+          ],
       ],
     );
   }

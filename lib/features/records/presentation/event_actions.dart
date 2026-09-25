@@ -18,7 +18,6 @@ abstract final class EventActions {
     BuildContext context,
     VehicleEvent event,
     ValueChanged<VehicleEvent> onDelete,
-    ValueChanged<VehicleEvent> onRestore,
   ) async {
     final isPayment = event.obligationId != null;
     final confirmed = await showDialog<bool>(
@@ -47,14 +46,5 @@ abstract final class EventActions {
     if (confirmed != true || !context.mounted) return;
 
     onDelete(event);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(isPayment ? 'Pagamento anulado.' : 'Registo eliminado.'),
-        action: SnackBarAction(
-          label: 'Desfazer',
-          onPressed: () => onRestore(event),
-        ),
-      ),
-    );
   }
 }

@@ -162,16 +162,29 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
                   decoration: InputDecoration(
                     labelText: field.label,
                     hintText: field.hint,
-                    prefixIcon: Icon(field.icon),
+                    prefixIcon: field.date
+                        ? IconButton(
+                            onPressed: () => _selectDate(field.label),
+                            tooltip: 'Escolher data',
+                            icon: Icon(field.icon),
+                          )
+                        : Icon(field.icon),
                   ),
                   keyboardType: field.numeric
                       ? const TextInputType.numberWithOptions(decimal: true)
                       : TextInputType.text,
-                  validator: field.required
-                      ? (value) => value == null || value.trim().isEmpty
-                            ? 'Campo obrigatório'
-                            : null
-                      : null,
+                  validator: (value) {
+                    final text = value?.trim() ?? '';
+                    if (field.required && text.isEmpty) {
+                      return 'Campo obrigatório';
+                    }
+                    if (field.date &&
+                        text.isNotEmpty &&
+                        _parseDate(text) == null) {
+                      return 'Indique uma data válida';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 12),
               ],
@@ -232,6 +245,7 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
         'Data',
         Icons.calendar_today_rounded,
         hint: 'DD/MM/AAAA',
+        date: true,
       ),
       _FieldDefinition('Quilometragem', Icons.speed_rounded, numeric: true),
       _FieldDefinition('Custo', Icons.euro_rounded, numeric: true),
@@ -239,6 +253,7 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
         'Próxima manutenção (opcional)',
         Icons.event_repeat_rounded,
         required: false,
+        date: true,
       ),
     ],
     RecordType.iuc => const [
@@ -256,12 +271,14 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
         'Prazo de pagamento',
         Icons.event_rounded,
         hint: 'DD/MM/AAAA',
+        date: true,
       ),
       _FieldDefinition(
         'Data de pagamento',
         Icons.event_available_rounded,
         hint: 'DD/MM/AAAA',
         required: false,
+        date: true,
       ),
       _FieldDefinition('Valor', Icons.euro_rounded, numeric: true),
     ],
@@ -283,6 +300,7 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
         'Data de renovação',
         Icons.event_repeat_rounded,
         hint: 'DD/MM/AAAA',
+        date: true,
       ),
     ],
     RecordType.otherExpense => const [
@@ -301,13 +319,14 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
         'Data',
         Icons.calendar_today_rounded,
         hint: 'DD/MM/AAAA',
+        date: true,
       ),
       _FieldDefinition('Valor', Icons.euro_rounded, numeric: true),
     ],
     RecordType.inspection => const [
-      _FieldDefinition('Data', Icons.calendar_today_rounded),
+      _FieldDefinition('Data', Icons.calendar_today_rounded, date: true),
       _FieldDefinition('Resultado', Icons.fact_check_rounded),
-      _FieldDefinition('Validade', Icons.event_rounded),
+      _FieldDefinition('Validade', Icons.event_rounded, date: true),
       _FieldDefinition('Valor', Icons.euro_rounded, numeric: true),
     ],
   };
@@ -346,6 +365,24 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
 
   String _value(String label) => _controllers[label]?.text.trim() ?? '';
 
+  Future<void> _selectDate(String label) async {
+    final controller = _controllers[label];
+    if (controller == null) return;
+    final now = DateTime.now();
+    final current = _parseDate(controller.text) ?? now;
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: current,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(now.year + 10, 12, 31),
+    );
+    if (selected == null) return;
+    controller.text =
+        '${selected.day.toString().padLeft(2, '0')}/'
+        '${selected.month.toString().padLeft(2, '0')}/'
+        '${selected.year}';
+  }
+
   DateTime? _parseDate(String value) {
     final parts = value.split('/');
     if (parts.length != 3) return null;
@@ -353,7 +390,11 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
     final month = int.tryParse(parts[1]);
     final year = int.tryParse(parts[2]);
     if (day == null || month == null || year == null) return null;
-    return DateTime(year, month, day);
+    final parsed = DateTime(year, month, day);
+    if (parsed.year != year || parsed.month != month || parsed.day != day) {
+      return null;
+    }
+    return parsed;
   }
 }
 
@@ -364,6 +405,7 @@ class _FieldDefinition {
     this.hint,
     this.numeric = false,
     this.required = true,
+    this.date = false,
   });
 
   final String label;
@@ -371,4 +413,5 @@ class _FieldDefinition {
   final String? hint;
   final bool numeric;
   final bool required;
+  final bool date;
 }

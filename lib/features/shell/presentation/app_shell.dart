@@ -31,6 +31,7 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _index = 0;
   late String _selectedVehicleId;
+  String? _activityVehicleId;
   late final List<Vehicle> _vehicles;
   late final List<RecurringObligation> _obligations;
   late final List<VehicleEvent> _events;
@@ -194,6 +195,12 @@ class _AppShellState extends State<AppShell> {
         onVehicleChanged: (vehicleId) {
           setState(() => _selectedVehicleId = vehicleId);
         },
+        onViewAllEvents: () {
+          setState(() {
+            _activityVehicleId = _selectedVehicleId;
+            _index = 2;
+          });
+        },
       ),
       VehiclesPage(
         vehicles: _vehicles,
@@ -207,6 +214,10 @@ class _AppShellState extends State<AppShell> {
         events: _events,
         onEventSaved: _saveEvent,
         onEventDeleted: _deleteEvent,
+        selectedVehicleId: _activityVehicleId,
+        onVehicleChanged: (vehicleId) {
+          setState(() => _activityVehicleId = vehicleId);
+        },
       ),
       const ExpensesPage(),
     ];

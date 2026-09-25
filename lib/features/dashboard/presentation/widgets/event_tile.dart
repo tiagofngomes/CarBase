@@ -115,3 +115,31 @@ class EventTile extends StatelessWidget {
     );
   }
 }
+
+class EventCard extends StatelessWidget {
+  const EventCard({
+    super.key,
+    required this.event,
+    this.onEdit,
+    this.onDelete,
+  });
+
+  final VehicleEvent event;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: EventTile(
+          event: event,
+          showDivider: false,
+          onEdit: onEdit,
+          onDelete: onDelete,
+        ),
+      ),
+    );
+  }
+}

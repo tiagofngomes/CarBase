@@ -4,14 +4,16 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/models/vehicle.dart';
 
 class VehicleEntrySheet extends StatefulWidget {
-  const VehicleEntrySheet({super.key});
+  const VehicleEntrySheet({super.key, this.existing});
 
-  static Future<Vehicle?> show(BuildContext context) {
+  final Vehicle? existing;
+
+  static Future<Vehicle?> show(BuildContext context, {Vehicle? existing}) {
     return showModalBottomSheet<Vehicle>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => const VehicleEntrySheet(),
+      builder: (_) => VehicleEntrySheet(existing: existing),
     );
   }
 
@@ -21,12 +23,26 @@ class VehicleEntrySheet extends StatefulWidget {
 
 class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
   final _formKey = GlobalKey<FormState>();
-  final _make = TextEditingController();
-  final _model = TextEditingController();
-  final _plate = TextEditingController();
-  final _person = TextEditingController();
-  final _mileage = TextEditingController();
-  final _year = TextEditingController();
+  late final TextEditingController _make;
+  late final TextEditingController _model;
+  late final TextEditingController _plate;
+  late final TextEditingController _person;
+  late final TextEditingController _mileage;
+  late final TextEditingController _year;
+
+  bool get _isEditing => widget.existing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final vehicle = widget.existing;
+    _make = TextEditingController(text: vehicle?.make ?? '');
+    _model = TextEditingController(text: vehicle?.model ?? '');
+    _plate = TextEditingController(text: vehicle?.licensePlate ?? '');
+    _person = TextEditingController(text: vehicle?.associatedPerson ?? '');
+    _mileage = TextEditingController(text: vehicle?.mileage.toString() ?? '');
+    _year = TextEditingController(text: vehicle?.year.toString() ?? '');
+  }
 
   @override
   void dispose() {
@@ -67,9 +83,16 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
               ),
               const SizedBox(height: 22),
               Text(
-                'Adicionar veículo',
+                _isEditing ? 'Editar veículo' : 'Adicionar veículo',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
+              if (_isEditing) ...[
+                const SizedBox(height: 5),
+                Text(
+                  'Atualize os dados e a quilometragem atual.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -115,7 +138,9 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: _save,
-                  child: const Text('Adicionar à garagem'),
+                  child: Text(
+                    _isEditing ? 'Guardar alterações' : 'Adicionar à garagem',
+                  ),
                 ),
               ),
             ],
@@ -142,9 +167,15 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
         prefixIcon: icon == null ? null : Icon(icon),
       ),
       validator: required
-          ? (value) => value == null || value.trim().isEmpty
-                ? 'Campo obrigatório'
-                : null
+          ? (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Campo obrigatório';
+              }
+              if (numeric && int.tryParse(value.trim()) == null) {
+                return 'Indique um número válido';
+              }
+              return null;
+            }
           : null,
     );
   }
@@ -154,14 +185,18 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
     Navigator.pop(
       context,
       Vehicle(
-        id: 'vehicle-${DateTime.now().microsecondsSinceEpoch}',
+        id:
+            widget.existing?.id ??
+            'vehicle-${DateTime.now().microsecondsSinceEpoch}',
         make: _make.text.trim(),
         model: _model.text.trim(),
         year: int.tryParse(_year.text) ?? DateTime.now().year,
         licensePlate: _plate.text.trim().toUpperCase(),
         mileage: int.tryParse(_mileage.text) ?? 0,
-        nextInspection: DateTime.now().add(const Duration(days: 365)),
-        color: AppColors.navy.toARGB32(),
+        nextInspection:
+            widget.existing?.nextInspection ??
+            DateTime.now().add(const Duration(days: 365)),
+        color: widget.existing?.color ?? AppColors.navy.toARGB32(),
         associatedPerson: _person.text.trim().isEmpty
             ? null
             : _person.text.trim(),

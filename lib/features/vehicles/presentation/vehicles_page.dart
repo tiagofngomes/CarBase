@@ -48,6 +48,7 @@ class VehiclesPage extends StatelessWidget {
                 builder: (_) => VehicleDetailPage(
                   vehicle: vehicle,
                   events: events,
+                  onVehicleSaved: onVehicleSaved,
                   onEventSaved: onEventSaved,
                   onEventDeleted: onEventDeleted,
                 ),
