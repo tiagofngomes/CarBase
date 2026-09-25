@@ -28,7 +28,7 @@ abstract final class DemoData {
       licensePlate: '45-TL-92',
       mileage: 112830,
       nextInspection: DateTime(2027, 2, 6),
-      color: 0xFF667884,
+      color: 0xFF244A68,
       associatedPerson: 'Ana',
     ),
   ];

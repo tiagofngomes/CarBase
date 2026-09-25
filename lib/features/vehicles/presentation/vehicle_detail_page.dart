@@ -62,10 +62,10 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
           Container(
             height: 190,
             decoration: BoxDecoration(
-              color: Color(_vehicle.color),
+              color: AppColors.navy,
               borderRadius: BorderRadius.circular(26),
-              gradient: LinearGradient(
-                colors: [Color(_vehicle.color), AppColors.blue],
+              gradient: const LinearGradient(
+                colors: [AppColors.navy, AppColors.blue],
               ),
             ),
             child: Column(

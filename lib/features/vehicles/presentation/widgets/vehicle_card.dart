@@ -27,7 +27,7 @@ class VehicleCard extends StatelessWidget {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: Color(vehicle.color),
+                      color: AppColors.navy,
                       borderRadius: BorderRadius.circular(19),
                     ),
                     child: Icon(
