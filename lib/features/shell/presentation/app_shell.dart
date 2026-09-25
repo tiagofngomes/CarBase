@@ -220,7 +220,7 @@ class _AppShellState extends State<AppShell> {
           setState(() => _activityVehicleId = vehicleId);
         },
       ),
-      const ExpensesPage(),
+      ExpensesPage(events: _events, vehicles: _vehicles),
     ];
 
     return Scaffold(

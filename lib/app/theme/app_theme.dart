@@ -74,6 +74,15 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.all(Radius.circular(24)),
         ),
       ),
+      datePickerTheme: const DatePickerThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(24)),
+        ),
+        headerBackgroundColor: AppColors.navy,
+        headerForegroundColor: Colors.white,
+      ),
       popupMenuTheme: const PopupMenuThemeData(
         color: AppColors.surface,
         surfaceTintColor: Colors.transparent,

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../app/theme/app_colors.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../shared/widgets/app_modal.dart';
+import '../../../shared/widgets/app_notes.dart';
 
 class InspectionCompletion {
   const InspectionCompletion({
@@ -23,10 +24,8 @@ class InspectionCompletionSheet extends StatefulWidget {
   const InspectionCompletionSheet({super.key});
 
   static Future<InspectionCompletion?> show(BuildContext context) {
-    return showModalBottomSheet<InspectionCompletion>(
+    return showAppModal<InspectionCompletion>(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
       builder: (_) => const InspectionCompletionSheet(),
     );
   }
@@ -59,12 +58,7 @@ class _InspectionCompletionSheetState extends State<InspectionCompletionSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        24,
-        12,
-        24,
-        24 + MediaQuery.viewInsetsOf(context).bottom,
-      ),
+      padding: const EdgeInsets.all(24),
       child: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -72,17 +66,6 @@ class _InspectionCompletionSheetState extends State<InspectionCompletionSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 22),
               Text(
                 'Registar inspeção',
                 style: Theme.of(context).textTheme.titleLarge,
@@ -147,14 +130,7 @@ class _InspectionCompletionSheetState extends State<InspectionCompletionSheet> {
                 },
               ),
               const SizedBox(height: 12),
-              TextField(
-                controller: _notes,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Notas (opcional)',
-                  prefixIcon: Icon(Icons.notes_rounded),
-                ),
-              ),
+              AppNotesField(controller: _notes),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,

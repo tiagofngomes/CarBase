@@ -6,6 +6,7 @@ import '../../../core/models/vehicle_event.dart';
 import '../../../core/models/recurring_obligation.dart';
 import '../../../core/models/record_type.dart';
 import '../../../shared/widgets/section_header.dart';
+import '../../../shared/widgets/app_notice.dart';
 import '../../obligations/presentation/obligation_reminder_card.dart';
 import '../../obligations/presentation/obligation_setup_sheet.dart';
 import '../../obligations/presentation/payment_confirmation_sheet.dart';
@@ -222,9 +223,7 @@ class _DashboardPageState extends State<DashboardPage> {
         inspection.amount,
         inspection.notes,
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Inspeção registada com sucesso.')),
-      );
+      AppNotice.show(context, 'Inspeção registada com sucesso.');
       return;
     }
     final payment = await PaymentConfirmationSheet.show(context, obligation);
@@ -237,12 +236,9 @@ class _DashboardPageState extends State<DashboardPage> {
     );
     final next = obligation.markAsPaid();
     final type = obligation.type == RecordType.iuc ? 'IUC' : 'Seguro';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$type pago. Próximo aviso: ${next.nextDueDate.month}/${next.nextDueDate.year}.',
-        ),
-      ),
+    AppNotice.show(
+      context,
+      '$type pago. Próximo aviso: ${next.nextDueDate.month}/${next.nextDueDate.year}.',
     );
   }
 }

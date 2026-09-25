@@ -4,6 +4,9 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/models/record_type.dart';
 import '../../../core/models/recurring_obligation.dart';
 import '../../../core/models/vehicle.dart';
+import '../../../shared/widgets/app_modal.dart';
+import '../../../shared/widgets/app_notice.dart';
+import '../../../shared/widgets/app_notes.dart';
 
 class ObligationSetupSheet extends StatefulWidget {
   const ObligationSetupSheet({
@@ -26,10 +29,8 @@ class ObligationSetupSheet extends StatefulWidget {
     required ValueChanged<RecurringObligation> onSave,
     RecurringObligation? existing,
   }) {
-    return showModalBottomSheet<void>(
+    return showAppModal<void>(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
       builder: (_) => ObligationSetupSheet(
         vehicle: vehicle,
         type: type,
@@ -116,28 +117,12 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        24,
-        12,
-        24,
-        24 + MediaQuery.viewInsetsOf(context).bottom,
-      ),
+      padding: const EdgeInsets.all(24),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 22),
             Text(
               widget.existing == null
                   ? 'Configurar ${widget.type.label}'
@@ -342,15 +327,7 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
               ),
             ],
             const SizedBox(height: 12),
-            TextField(
-              controller: _notesController,
-              maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Notas (opcional)',
-                hintText: 'Acrescente alguma informação relevante',
-                prefixIcon: Icon(Icons.notes_rounded),
-              ),
-            ),
+            AppNotesField(controller: _notesController),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -404,9 +381,7 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
         remindDueMonth: _remindDueMonth,
       ),
     );
+    AppNotice.show(context, 'Avisos de ${widget.type.label} atualizados.');
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Avisos de ${widget.type.label} atualizados.')),
-    );
   }
 }

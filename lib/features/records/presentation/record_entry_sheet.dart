@@ -4,6 +4,9 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/models/record_type.dart';
 import '../../../core/models/vehicle.dart';
 import '../../../core/models/vehicle_event.dart';
+import '../../../shared/widgets/app_modal.dart';
+import '../../../shared/widgets/app_notice.dart';
+import '../../../shared/widgets/app_notes.dart';
 
 class RecordEntrySheet extends StatefulWidget {
   const RecordEntrySheet({
@@ -23,10 +26,8 @@ class RecordEntrySheet extends StatefulWidget {
     Vehicle vehicle,
     ValueChanged<VehicleEvent> onSave,
   ) {
-    return showModalBottomSheet<void>(
+    return showAppModal<void>(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
       builder: (_) =>
           RecordEntrySheet(type: type, vehicle: vehicle, onSave: onSave),
     );
@@ -63,12 +64,7 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
   Widget build(BuildContext context) {
     final fields = _fieldsFor(widget.type);
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        24,
-        12,
-        24,
-        24 + MediaQuery.viewInsetsOf(context).bottom,
-      ),
+      padding: const EdgeInsets.all(24),
       child: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -76,17 +72,6 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 22),
               Row(
                 children: [
                   Container(
@@ -216,14 +201,7 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
                 ),
                 const SizedBox(height: 12),
               ],
-              TextFormField(
-                controller: _notesController,
-                decoration: const InputDecoration(
-                  labelText: 'Notas (opcional)',
-                  prefixIcon: Icon(Icons.notes_rounded),
-                ),
-                maxLines: 2,
-              ),
+              AppNotesField(controller: _notesController, hintText: null),
               const SizedBox(height: 18),
               OutlinedButton.icon(
                 onPressed: () {},
@@ -391,10 +369,8 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
             : _notesController.text.trim(),
       ),
     );
+    AppNotice.show(context, '${widget.type.label} registado com sucesso.');
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${widget.type.label} registado com sucesso.')),
-    );
   }
 
   String _value(String label) => _controllers[label]?.text.trim() ?? '';

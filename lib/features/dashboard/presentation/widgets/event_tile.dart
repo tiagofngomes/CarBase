@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/models/vehicle_event.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../shared/widgets/app_notes.dart';
 
 class EventTile extends StatelessWidget {
   const EventTile({
@@ -53,13 +54,7 @@ class EventTile extends StatelessWidget {
                     ),
                     if (event.notes?.isNotEmpty == true) ...[
                       const SizedBox(height: 3),
-                      Text(
-                        event.notes!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall
-                            ?.copyWith(fontStyle: FontStyle.italic),
-                      ),
+                      AppNotesText(text: event.notes!),
                     ],
                   ],
                 ),
@@ -117,12 +112,7 @@ class EventTile extends StatelessWidget {
 }
 
 class EventCard extends StatelessWidget {
-  const EventCard({
-    super.key,
-    required this.event,
-    this.onEdit,
-    this.onDelete,
-  });
+  const EventCard({super.key, required this.event, this.onEdit, this.onDelete});
 
   final VehicleEvent event;
   final VoidCallback? onEdit;

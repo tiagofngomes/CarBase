@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/models/vehicle.dart';
+import '../../../shared/widgets/app_modal.dart';
 
 class VehicleEntrySheet extends StatefulWidget {
   const VehicleEntrySheet({super.key, this.existing});
@@ -9,10 +10,8 @@ class VehicleEntrySheet extends StatefulWidget {
   final Vehicle? existing;
 
   static Future<Vehicle?> show(BuildContext context, {Vehicle? existing}) {
-    return showModalBottomSheet<Vehicle>(
+    return showAppModal<Vehicle>(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
       builder: (_) => VehicleEntrySheet(existing: existing),
     );
   }
@@ -60,12 +59,7 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        24,
-        12,
-        24,
-        24 + MediaQuery.viewInsetsOf(context).bottom,
-      ),
+      padding: const EdgeInsets.all(24),
       child: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -73,17 +67,6 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 22),
               Text(
                 _isEditing ? 'Editar veículo' : 'Adicionar veículo',
                 style: Theme.of(context).textTheme.titleLarge,

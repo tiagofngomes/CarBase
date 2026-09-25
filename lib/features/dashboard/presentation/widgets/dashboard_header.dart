@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/app_notice.dart';
 
 class DashboardHeader extends StatelessWidget {
   const DashboardHeader({super.key});
@@ -37,8 +38,10 @@ class DashboardHeader extends StatelessWidget {
         ),
         IconButton.filledTonal(
           tooltip: 'Notificações',
-          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Não existem novas notificações.')),
+          onPressed: () => AppNotice.show(
+            context,
+            'Não existem novas notificações.',
+            type: AppNoticeType.info,
           ),
           icon: const Badge(
             smallSize: 7,
