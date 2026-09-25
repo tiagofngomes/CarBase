@@ -5,16 +5,21 @@ import '../../../core/models/vehicle.dart';
 import '../../../core/models/vehicle_event.dart';
 import '../../../core/utils/formatters.dart';
 import '../../dashboard/presentation/widgets/event_tile.dart';
+import '../../records/presentation/event_actions.dart';
 
 class VehicleDetailPage extends StatelessWidget {
   const VehicleDetailPage({
     super.key,
     required this.vehicle,
     required this.events,
+    required this.onEventSaved,
+    required this.onEventDeleted,
   });
 
   final Vehicle vehicle;
   final List<VehicleEvent> events;
+  final ValueChanged<VehicleEvent> onEventSaved;
+  final ValueChanged<VehicleEvent> onEventDeleted;
 
   @override
   Widget build(BuildContext context) {
@@ -108,6 +113,17 @@ class VehicleDetailPage extends StatelessWidget {
                     EventTile(
                       event: vehicleEvents[i],
                       showDivider: i < vehicleEvents.length - 1,
+                      onEdit: () => EventActions.edit(
+                        context,
+                        vehicleEvents[i],
+                        onEventSaved,
+                      ),
+                      onDelete: () => EventActions.delete(
+                        context,
+                        vehicleEvents[i],
+                        onEventDeleted,
+                        onEventSaved,
+                      ),
                     ),
                 ],
               ),

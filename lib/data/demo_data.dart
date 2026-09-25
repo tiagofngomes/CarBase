@@ -35,6 +35,7 @@ abstract final class DemoData {
 
   static final events = [
     VehicleEvent(
+      id: 'event-maintenance-1',
       vehicleId: '1',
       title: 'Mudança de óleo e filtros',
       subtitle: 'Auto Silva · 68.420 km',
@@ -43,6 +44,7 @@ abstract final class DemoData {
       amount: 189.90,
     ),
     VehicleEvent(
+      id: 'event-insurance-1',
       vehicleId: '1',
       title: 'Renovação do seguro',
       subtitle: 'Fidelidade · Apólice 4829017',
@@ -51,6 +53,7 @@ abstract final class DemoData {
       amount: 326.80,
     ),
     VehicleEvent(
+      id: 'event-inspection-1',
       vehicleId: '2',
       title: 'Inspeção periódica',
       subtitle: 'Aprovado sem anotações',
@@ -59,6 +62,7 @@ abstract final class DemoData {
       amount: 35.89,
     ),
     VehicleEvent(
+      id: 'event-iuc-1',
       vehicleId: '1',
       title: 'IUC 2026',
       subtitle: 'Pago · Autoridade Tributária',
@@ -66,6 +70,7 @@ abstract final class DemoData {
       type: RecordType.iuc,
     ),
     VehicleEvent(
+      id: 'event-expense-1',
       vehicleId: '2',
       title: 'Estacionamento mensal',
       subtitle: 'Parque da Estação',

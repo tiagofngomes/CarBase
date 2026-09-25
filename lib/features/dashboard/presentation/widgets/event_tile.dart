@@ -5,10 +5,18 @@ import '../../../../core/models/vehicle_event.dart';
 import '../../../../core/utils/formatters.dart';
 
 class EventTile extends StatelessWidget {
-  const EventTile({super.key, required this.event, this.showDivider = true});
+  const EventTile({
+    super.key,
+    required this.event,
+    this.showDivider = true,
+    this.onEdit,
+    this.onDelete,
+  });
 
   final VehicleEvent event;
   final bool showDivider;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +51,16 @@ class EventTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
+                    if (event.notes?.isNotEmpty == true) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        event.notes!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(fontStyle: FontStyle.italic),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -50,6 +68,44 @@ class EventTile extends StatelessWidget {
                 Text(
                   Formatters.currency(event.amount!),
                   style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              if (onEdit != null || onDelete != null)
+                PopupMenuButton<String>(
+                  tooltip: 'Opções do registo',
+                  icon: const Icon(
+                    Icons.more_vert_rounded,
+                    color: AppColors.muted,
+                  ),
+                  onSelected: (value) {
+                    if (value == 'edit') onEdit?.call();
+                    if (value == 'delete') onDelete?.call();
+                  },
+                  itemBuilder: (_) => [
+                    if (onEdit != null)
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(Icons.edit_outlined),
+                          title: Text('Editar'),
+                        ),
+                      ),
+                    if (onDelete != null)
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(
+                            Icons.delete_outline_rounded,
+                            color: AppColors.danger,
+                          ),
+                          title: Text(
+                            'Eliminar registo',
+                            style: TextStyle(color: AppColors.danger),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
             ],
           ),

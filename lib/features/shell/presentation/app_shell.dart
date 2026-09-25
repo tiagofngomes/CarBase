@@ -35,10 +35,45 @@ class _AppShellState extends State<AppShell> {
     });
   }
 
+  void _saveEvent(VehicleEvent event) {
+    setState(() {
+      final index = _events.indexWhere((item) => item.id == event.id);
+      if (index == -1) {
+        _events.insert(0, event);
+        if (event.obligationId != null) {
+          final obligationIndex = _obligations.indexWhere(
+            (item) => item.id == event.obligationId,
+          );
+          if (obligationIndex != -1) {
+            _obligations[obligationIndex] = _obligations[obligationIndex]
+                .markAsPaid();
+          }
+        }
+      } else {
+        _events[index] = event;
+      }
+    });
+  }
+
+  void _deleteEvent(VehicleEvent event) {
+    setState(() {
+      _events.removeWhere((item) => item.id == event.id);
+      if (event.obligationId != null) {
+        final index = _obligations.indexWhere(
+          (item) => item.id == event.obligationId,
+        );
+        if (index != -1) {
+          _obligations[index] = _obligations[index].revertLatestPayment();
+        }
+      }
+    });
+  }
+
   void _markObligationPaid(
     RecurringObligation obligation,
     double amount,
     DateTime paidAt,
+    String? notes,
   ) {
     setState(() {
       final index = _obligations.indexWhere((item) => item.id == obligation.id);
@@ -49,6 +84,7 @@ class _AppShellState extends State<AppShell> {
       _events.insert(
         0,
         VehicleEvent(
+          id: 'payment-${DateTime.now().microsecondsSinceEpoch}',
           vehicleId: obligation.vehicleId,
           title: isIuc ? 'IUC pago' : 'Seguro pago',
           subtitle: isIuc
@@ -57,6 +93,8 @@ class _AppShellState extends State<AppShell> {
           date: paidAt,
           type: obligation.type,
           amount: amount,
+          notes: notes,
+          obligationId: obligation.id,
         ),
       );
     });
@@ -69,14 +107,24 @@ class _AppShellState extends State<AppShell> {
         selectedVehicleId: _selectedVehicleId,
         obligations: _obligations,
         events: _events,
+        onEventSaved: _saveEvent,
+        onEventDeleted: _deleteEvent,
         onObligationSaved: _saveObligation,
         onObligationPaid: _markObligationPaid,
         onVehicleChanged: (vehicleId) {
           setState(() => _selectedVehicleId = vehicleId);
         },
       ),
-      VehiclesPage(events: _events),
-      ActivityPage(events: _events),
+      VehiclesPage(
+        events: _events,
+        onEventSaved: _saveEvent,
+        onEventDeleted: _deleteEvent,
+      ),
+      ActivityPage(
+        events: _events,
+        onEventSaved: _saveEvent,
+        onEventDeleted: _deleteEvent,
+      ),
       const ExpensesPage(),
     ];
 

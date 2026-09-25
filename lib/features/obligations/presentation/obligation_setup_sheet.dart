@@ -64,8 +64,10 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
   late PaymentFrequency _frequency;
   late bool _remindMonthBefore;
   late bool _remindDueMonth;
+  bool _showAdditionalInfo = false;
   late final TextEditingController _dayController;
   late final TextEditingController _providerController;
+  late final TextEditingController _notesController;
 
   bool get _isIuc => widget.type == RecordType.iuc;
 
@@ -86,12 +88,14 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
           : '',
     );
     _providerController = TextEditingController(text: existing?.provider ?? '');
+    _notesController = TextEditingController(text: existing?.notes ?? '');
   }
 
   @override
   void dispose() {
     _dayController.dispose();
     _providerController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -135,6 +139,8 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
             if (!_isIuc) ...[
               DropdownButtonFormField<PaymentFrequency>(
                 initialValue: _frequency,
+                borderRadius: BorderRadius.circular(18),
+                menuMaxHeight: 320,
                 decoration: const InputDecoration(
                   labelText: 'Periodicidade',
                   prefixIcon: Icon(Icons.autorenew_rounded),
@@ -153,6 +159,8 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
             ],
             DropdownButtonFormField<int>(
               initialValue: _month,
+              borderRadius: BorderRadius.circular(18),
+              menuMaxHeight: 360,
               decoration: InputDecoration(
                 labelText: _isIuc ? 'Mês do IUC' : 'Mês do próximo pagamento',
                 prefixIcon: const Icon(Icons.calendar_month_rounded),
@@ -163,15 +171,27 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
               ],
               onChanged: (value) => setState(() => _month = value!),
             ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Sei o dia exato'),
-              subtitle: const Text(
-                'Opcional — o mês é suficiente para criar avisos',
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
               ),
-              value: _hasExactDay,
-              onChanged: (value) => setState(() => _hasExactDay = value),
+              child: SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                title: const Text(
+                  'Definir dia específico',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: const Text(
+                  'Opcional. Sem um dia definido, os avisos serão apresentados durante o mês selecionado.',
+                ),
+                value: _hasExactDay,
+                onChanged: (value) => setState(() => _hasExactDay = value),
+              ),
             ),
+            const SizedBox(height: 12),
             if (_hasExactDay) ...[
               TextField(
                 controller: _dayController,
@@ -225,30 +245,87 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 6),
-            ExpansionTile(
-              tilePadding: EdgeInsets.zero,
-              title: const Text('Detalhes opcionais'),
-              children: [
-                if (!_isIuc) ...[
-                  TextField(
-                    controller: _providerController,
-                    decoration: const InputDecoration(
-                      labelText: 'Seguradora',
-                      prefixIcon: Icon(Icons.business_rounded),
+            if (!_isIuc) ...[
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  children: [
+                    InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => setState(
+                        () => _showAdditionalInfo = !_showAdditionalInfo,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.tune_rounded,
+                              size: 20,
+                              color: AppColors.blue,
+                            ),
+                            const SizedBox(width: 10),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Informação adicional',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    'Nome da seguradora',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.muted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            AnimatedRotation(
+                              turns: _showAdditionalInfo ? .5 : 0,
+                              duration: const Duration(milliseconds: 180),
+                              child: const Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                if (_isIuc)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      'O valor será pedido apenas quando registar o pagamento.',
-                      style: TextStyle(color: AppColors.muted, fontSize: 12),
-                    ),
-                  ),
-              ],
+                    if (_showAdditionalInfo)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                        child: TextField(
+                          controller: _providerController,
+                          decoration: const InputDecoration(
+                            labelText: 'Seguradora',
+                            prefixIcon: Icon(Icons.business_rounded),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            TextField(
+              controller: _notesController,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Notas (opcional)',
+                hintText: 'Acrescente alguma informação relevante',
+                prefixIcon: Icon(Icons.notes_rounded),
+              ),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -290,6 +367,9 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
         provider: _providerController.text.trim().isEmpty
             ? null
             : _providerController.text.trim(),
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
         remindMonthBefore: _remindMonthBefore,
         remindDueMonth: _remindDueMonth,
       ),

@@ -6,11 +6,19 @@ import '../../../core/models/vehicle_event.dart';
 import '../../../data/demo_data.dart';
 import '../../../shared/widgets/page_header.dart';
 import '../../dashboard/presentation/widgets/event_tile.dart';
+import '../../records/presentation/event_actions.dart';
 
 class ActivityPage extends StatefulWidget {
-  const ActivityPage({super.key, required this.events});
+  const ActivityPage({
+    super.key,
+    required this.events,
+    required this.onEventSaved,
+    required this.onEventDeleted,
+  });
 
   final List<VehicleEvent> events;
+  final ValueChanged<VehicleEvent> onEventSaved;
+  final ValueChanged<VehicleEvent> onEventDeleted;
 
   @override
   State<ActivityPage> createState() => _ActivityPageState();
@@ -113,6 +121,17 @@ class _ActivityPageState extends State<ActivityPage> {
                     EventTile(
                       event: events[i],
                       showDivider: i < events.length - 1,
+                      onEdit: () => EventActions.edit(
+                        context,
+                        events[i],
+                        widget.onEventSaved,
+                      ),
+                      onDelete: () => EventActions.delete(
+                        context,
+                        events[i],
+                        widget.onEventDeleted,
+                        widget.onEventSaved,
+                      ),
                     ),
                 ],
               ),

@@ -21,6 +21,7 @@ class RecurringObligation {
     required this.nextDueDate,
     this.hasExactDay = true,
     this.provider,
+    this.notes,
     this.remindMonthBefore = true,
     this.remindDueMonth = true,
   });
@@ -32,6 +33,7 @@ class RecurringObligation {
   final DateTime nextDueDate;
   final bool hasExactDay;
   final String? provider;
+  final String? notes;
   final bool remindMonthBefore;
   final bool remindDueMonth;
 
@@ -45,11 +47,22 @@ class RecurringObligation {
     return copyWith(nextDueDate: DateTime(year, month, day));
   }
 
+  RecurringObligation revertLatestPayment() {
+    return copyWith(
+      nextDueDate: DateTime(
+        nextDueDate.year,
+        nextDueDate.month - frequency.months,
+        nextDueDate.day,
+      ),
+    );
+  }
+
   RecurringObligation copyWith({
     PaymentFrequency? frequency,
     DateTime? nextDueDate,
     bool? hasExactDay,
     String? provider,
+    String? notes,
     bool? remindMonthBefore,
     bool? remindDueMonth,
   }) {
@@ -61,6 +74,7 @@ class RecurringObligation {
       nextDueDate: nextDueDate ?? this.nextDueDate,
       hasExactDay: hasExactDay ?? this.hasExactDay,
       provider: provider ?? this.provider,
+      notes: notes ?? this.notes,
       remindMonthBefore: remindMonthBefore ?? this.remindMonthBefore,
       remindDueMonth: remindDueMonth ?? this.remindDueMonth,
     );

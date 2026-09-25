@@ -4,6 +4,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/models/record_type.dart';
 import '../../../../core/models/recurring_obligation.dart';
 import '../../../../core/models/vehicle.dart';
+import '../../../../core/models/vehicle_event.dart';
 import '../../../obligations/presentation/obligation_setup_sheet.dart';
 import '../../../records/presentation/record_entry_sheet.dart';
 
@@ -13,11 +14,13 @@ class QuickActions extends StatelessWidget {
     required this.vehicle,
     required this.obligations,
     required this.onObligationSaved,
+    required this.onEventSaved,
   });
 
   final Vehicle vehicle;
   final List<RecurringObligation> obligations;
   final ValueChanged<RecurringObligation> onObligationSaved;
+  final ValueChanged<VehicleEvent> onEventSaved;
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +86,6 @@ class QuickActions extends StatelessWidget {
       );
       return;
     }
-    RecordEntrySheet.show(context, type, vehicle);
+    RecordEntrySheet.show(context, type, vehicle, onEventSaved);
   }
 }

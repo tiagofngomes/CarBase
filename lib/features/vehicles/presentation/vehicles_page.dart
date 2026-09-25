@@ -7,9 +7,16 @@ import 'vehicle_detail_page.dart';
 import 'widgets/vehicle_card.dart';
 
 class VehiclesPage extends StatelessWidget {
-  const VehiclesPage({super.key, required this.events});
+  const VehiclesPage({
+    super.key,
+    required this.events,
+    required this.onEventSaved,
+    required this.onEventDeleted,
+  });
 
   final List<VehicleEvent> events;
+  final ValueChanged<VehicleEvent> onEventSaved;
+  final ValueChanged<VehicleEvent> onEventDeleted;
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +40,12 @@ class VehiclesPage extends StatelessWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    VehicleDetailPage(vehicle: vehicle, events: events),
+                builder: (_) => VehicleDetailPage(
+                  vehicle: vehicle,
+                  events: events,
+                  onEventSaved: onEventSaved,
+                  onEventDeleted: onEventDeleted,
+                ),
               ),
             ),
           ),

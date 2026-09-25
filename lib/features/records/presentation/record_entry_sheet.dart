@@ -3,27 +3,32 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/models/record_type.dart';
 import '../../../core/models/vehicle.dart';
+import '../../../core/models/vehicle_event.dart';
 
 class RecordEntrySheet extends StatefulWidget {
   const RecordEntrySheet({
     super.key,
     required this.type,
     required this.vehicle,
+    required this.onSave,
   });
 
   final RecordType type;
   final Vehicle vehicle;
+  final ValueChanged<VehicleEvent> onSave;
 
   static Future<void> show(
     BuildContext context,
     RecordType type,
     Vehicle vehicle,
+    ValueChanged<VehicleEvent> onSave,
   ) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => RecordEntrySheet(type: type, vehicle: vehicle),
+      builder: (_) =>
+          RecordEntrySheet(type: type, vehicle: vehicle, onSave: onSave),
     );
   }
 
@@ -33,6 +38,26 @@ class RecordEntrySheet extends StatefulWidget {
 
 class _RecordEntrySheetState extends State<RecordEntrySheet> {
   final _formKey = GlobalKey<FormState>();
+  final _notesController = TextEditingController();
+  late final Map<String, TextEditingController> _controllers;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = {
+      for (final field in _fieldsFor(widget.type))
+        field.label: TextEditingController(),
+    };
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _controllers.values) {
+      controller.dispose();
+    }
+    _notesController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +158,7 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
               const SizedBox(height: 12),
               for (final field in fields) ...[
                 TextFormField(
+                  controller: _controllers[field.label],
                   decoration: InputDecoration(
                     labelText: field.label,
                     hintText: field.hint,
@@ -150,6 +176,7 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
                 const SizedBox(height: 12),
               ],
               TextFormField(
+                controller: _notesController,
                 decoration: const InputDecoration(
                   labelText: 'Notas (opcional)',
                   prefixIcon: Icon(Icons.notes_rounded),
@@ -287,10 +314,46 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
 
   void _save() {
     if (!_formKey.currentState!.validate()) return;
+    final isMaintenance = widget.type == RecordType.maintenance;
+    final title = _value(isMaintenance ? 'Serviço realizado' : 'Descrição');
+    final subtitle = isMaintenance
+        ? '${_value('Oficina')} · ${_value('Quilometragem')} km'
+        : '${_value('Categoria')} · ${_value('Fornecedor (opcional)')}'
+              .replaceAll(RegExp(r' · $'), '');
+    final amount = double.tryParse(
+      _value(isMaintenance ? 'Custo' : 'Valor').replaceAll(',', '.'),
+    );
+    final date = _parseDate(_value('Data')) ?? DateTime.now();
+    widget.onSave(
+      VehicleEvent(
+        id: 'record-${DateTime.now().microsecondsSinceEpoch}',
+        vehicleId: widget.vehicle.id,
+        title: title,
+        subtitle: subtitle,
+        date: date,
+        type: widget.type,
+        amount: amount,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+      ),
+    );
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${widget.type.label} registado com sucesso.')),
     );
+  }
+
+  String _value(String label) => _controllers[label]?.text.trim() ?? '';
+
+  DateTime? _parseDate(String value) {
+    final parts = value.split('/');
+    if (parts.length != 3) return null;
+    final day = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final year = int.tryParse(parts[2]);
+    if (day == null || month == null || year == null) return null;
+    return DateTime(year, month, day);
   }
 }
 

@@ -6,10 +6,15 @@ import '../../../core/models/recurring_obligation.dart';
 import '../../../core/utils/formatters.dart';
 
 class PaymentConfirmation {
-  const PaymentConfirmation({required this.amount, required this.paidAt});
+  const PaymentConfirmation({
+    required this.amount,
+    required this.paidAt,
+    this.notes,
+  });
 
   final double amount;
   final DateTime paidAt;
+  final String? notes;
 }
 
 class PaymentConfirmationSheet extends StatefulWidget {
@@ -37,11 +42,13 @@ class PaymentConfirmationSheet extends StatefulWidget {
 class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
+  final _notesController = TextEditingController();
   DateTime _paidAt = DateTime.now();
 
   @override
   void dispose() {
     _amountController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -130,6 +137,16 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
               'Se não alterar, é assumida a data de hoje.',
               style: TextStyle(fontSize: 11, color: AppColors.muted),
             ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _notesController,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Notas (opcional)',
+                hintText: 'Acrescente alguma informação relevante',
+                prefixIcon: Icon(Icons.notes_rounded),
+              ),
+            ),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
@@ -159,7 +176,13 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
     final amount = double.parse(_amountController.text.replaceAll(',', '.'));
     Navigator.pop(
       context,
-      PaymentConfirmation(amount: amount, paidAt: _paidAt),
+      PaymentConfirmation(
+        amount: amount,
+        paidAt: _paidAt,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+      ),
     );
   }
 }

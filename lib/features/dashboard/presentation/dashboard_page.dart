@@ -10,6 +10,7 @@ import '../../../shared/widgets/section_header.dart';
 import '../../obligations/presentation/obligation_reminder_card.dart';
 import '../../obligations/presentation/obligation_setup_sheet.dart';
 import '../../obligations/presentation/payment_confirmation_sheet.dart';
+import '../../records/presentation/event_actions.dart';
 import 'widgets/dashboard_header.dart';
 import 'widgets/event_tile.dart';
 import 'widgets/quick_actions.dart';
@@ -25,6 +26,8 @@ class DashboardPage extends StatefulWidget {
     required this.events,
     required this.onObligationSaved,
     required this.onObligationPaid,
+    required this.onEventSaved,
+    required this.onEventDeleted,
   });
 
   final String selectedVehicleId;
@@ -36,8 +39,11 @@ class DashboardPage extends StatefulWidget {
     RecurringObligation obligation,
     double amount,
     DateTime paidAt,
+    String? notes,
   )
   onObligationPaid;
+  final ValueChanged<VehicleEvent> onEventSaved;
+  final ValueChanged<VehicleEvent> onEventDeleted;
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -129,6 +135,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 vehicle: _selectedVehicle,
                 obligations: widget.obligations,
                 onObligationSaved: widget.onObligationSaved,
+                onEventSaved: widget.onEventSaved,
               ),
               const SizedBox(height: 24),
               const SectionHeader(title: 'Próximos compromissos'),
@@ -169,6 +176,17 @@ class _DashboardPageState extends State<DashboardPage> {
                               EventTile(
                                 event: vehicleEvents[i],
                                 showDivider: i < vehicleEvents.length - 1,
+                                onEdit: () => EventActions.edit(
+                                  context,
+                                  vehicleEvents[i],
+                                  widget.onEventSaved,
+                                ),
+                                onDelete: () => EventActions.delete(
+                                  context,
+                                  vehicleEvents[i],
+                                  widget.onEventDeleted,
+                                  widget.onEventSaved,
+                                ),
                               ),
                           ],
                         ),
@@ -197,7 +215,12 @@ class _DashboardPageState extends State<DashboardPage> {
   ) async {
     final payment = await PaymentConfirmationSheet.show(context, obligation);
     if (payment == null || !context.mounted) return;
-    widget.onObligationPaid(obligation, payment.amount, payment.paidAt);
+    widget.onObligationPaid(
+      obligation,
+      payment.amount,
+      payment.paidAt,
+      payment.notes,
+    );
     final next = obligation.markAsPaid();
     final type = obligation.type == RecordType.iuc ? 'IUC' : 'Seguro';
     ScaffoldMessenger.of(context).showSnackBar(
