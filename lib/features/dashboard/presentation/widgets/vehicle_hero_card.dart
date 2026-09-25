@@ -61,11 +61,7 @@ class VehicleHeroCard extends StatelessWidget {
                   color: Colors.white.withValues(alpha: .12),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(
-                  Icons.directions_car_filled_rounded,
-                  color: Colors.white,
-                  size: 36,
-                ),
+                child: Icon(vehicle.type.icon, color: Colors.white, size: 36),
               ),
               const SizedBox(width: 16),
               Expanded(

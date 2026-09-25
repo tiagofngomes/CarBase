@@ -30,8 +30,8 @@ class VehicleCard extends StatelessWidget {
                       color: Color(vehicle.color),
                       borderRadius: BorderRadius.circular(19),
                     ),
-                    child: const Icon(
-                      Icons.directions_car_filled_rounded,
+                    child: Icon(
+                      vehicle.type.icon,
                       color: Colors.white,
                       size: 31,
                     ),

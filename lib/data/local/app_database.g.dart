@@ -99,6 +99,18 @@ class $VehicleEntriesTable extends VehicleEntries
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _vehicleTypeMeta = const VerificationMeta(
+    'vehicleType',
+  );
+  @override
+  late final GeneratedColumn<String> vehicleType = GeneratedColumn<String>(
+    'vehicle_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('car'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -110,6 +122,7 @@ class $VehicleEntriesTable extends VehicleEntries
     nextInspection,
     color,
     associatedPerson,
+    vehicleType,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -199,6 +212,15 @@ class $VehicleEntriesTable extends VehicleEntries
         ),
       );
     }
+    if (data.containsKey('vehicle_type')) {
+      context.handle(
+        _vehicleTypeMeta,
+        vehicleType.isAcceptableOrUnknown(
+          data['vehicle_type']!,
+          _vehicleTypeMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -244,6 +266,10 @@ class $VehicleEntriesTable extends VehicleEntries
         DriftSqlType.string,
         data['${effectivePrefix}associated_person'],
       ),
+      vehicleType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vehicle_type'],
+      )!,
     );
   }
 
@@ -263,6 +289,7 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
   final DateTime nextInspection;
   final int color;
   final String? associatedPerson;
+  final String vehicleType;
   const VehicleRow({
     required this.id,
     required this.make,
@@ -273,6 +300,7 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
     required this.nextInspection,
     required this.color,
     this.associatedPerson,
+    required this.vehicleType,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -288,6 +316,7 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
     if (!nullToAbsent || associatedPerson != null) {
       map['associated_person'] = Variable<String>(associatedPerson);
     }
+    map['vehicle_type'] = Variable<String>(vehicleType);
     return map;
   }
 
@@ -304,6 +333,7 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
       associatedPerson: associatedPerson == null && nullToAbsent
           ? const Value.absent()
           : Value(associatedPerson),
+      vehicleType: Value(vehicleType),
     );
   }
 
@@ -322,6 +352,7 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
       nextInspection: serializer.fromJson<DateTime>(json['nextInspection']),
       color: serializer.fromJson<int>(json['color']),
       associatedPerson: serializer.fromJson<String?>(json['associatedPerson']),
+      vehicleType: serializer.fromJson<String>(json['vehicleType']),
     );
   }
   @override
@@ -337,6 +368,7 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
       'nextInspection': serializer.toJson<DateTime>(nextInspection),
       'color': serializer.toJson<int>(color),
       'associatedPerson': serializer.toJson<String?>(associatedPerson),
+      'vehicleType': serializer.toJson<String>(vehicleType),
     };
   }
 
@@ -350,6 +382,7 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
     DateTime? nextInspection,
     int? color,
     Value<String?> associatedPerson = const Value.absent(),
+    String? vehicleType,
   }) => VehicleRow(
     id: id ?? this.id,
     make: make ?? this.make,
@@ -362,6 +395,7 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
     associatedPerson: associatedPerson.present
         ? associatedPerson.value
         : this.associatedPerson,
+    vehicleType: vehicleType ?? this.vehicleType,
   );
   VehicleRow copyWithCompanion(VehicleEntriesCompanion data) {
     return VehicleRow(
@@ -380,6 +414,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
       associatedPerson: data.associatedPerson.present
           ? data.associatedPerson.value
           : this.associatedPerson,
+      vehicleType: data.vehicleType.present
+          ? data.vehicleType.value
+          : this.vehicleType,
     );
   }
 
@@ -394,7 +431,8 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
           ..write('mileage: $mileage, ')
           ..write('nextInspection: $nextInspection, ')
           ..write('color: $color, ')
-          ..write('associatedPerson: $associatedPerson')
+          ..write('associatedPerson: $associatedPerson, ')
+          ..write('vehicleType: $vehicleType')
           ..write(')'))
         .toString();
   }
@@ -410,6 +448,7 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
     nextInspection,
     color,
     associatedPerson,
+    vehicleType,
   );
   @override
   bool operator ==(Object other) =>
@@ -423,7 +462,8 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
           other.mileage == this.mileage &&
           other.nextInspection == this.nextInspection &&
           other.color == this.color &&
-          other.associatedPerson == this.associatedPerson);
+          other.associatedPerson == this.associatedPerson &&
+          other.vehicleType == this.vehicleType);
 }
 
 class VehicleEntriesCompanion extends UpdateCompanion<VehicleRow> {
@@ -436,6 +476,7 @@ class VehicleEntriesCompanion extends UpdateCompanion<VehicleRow> {
   final Value<DateTime> nextInspection;
   final Value<int> color;
   final Value<String?> associatedPerson;
+  final Value<String> vehicleType;
   final Value<int> rowid;
   const VehicleEntriesCompanion({
     this.id = const Value.absent(),
@@ -447,6 +488,7 @@ class VehicleEntriesCompanion extends UpdateCompanion<VehicleRow> {
     this.nextInspection = const Value.absent(),
     this.color = const Value.absent(),
     this.associatedPerson = const Value.absent(),
+    this.vehicleType = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   VehicleEntriesCompanion.insert({
@@ -459,6 +501,7 @@ class VehicleEntriesCompanion extends UpdateCompanion<VehicleRow> {
     required DateTime nextInspection,
     required int color,
     this.associatedPerson = const Value.absent(),
+    this.vehicleType = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        make = Value(make),
@@ -478,6 +521,7 @@ class VehicleEntriesCompanion extends UpdateCompanion<VehicleRow> {
     Expression<DateTime>? nextInspection,
     Expression<int>? color,
     Expression<String>? associatedPerson,
+    Expression<String>? vehicleType,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -490,6 +534,7 @@ class VehicleEntriesCompanion extends UpdateCompanion<VehicleRow> {
       if (nextInspection != null) 'next_inspection': nextInspection,
       if (color != null) 'color': color,
       if (associatedPerson != null) 'associated_person': associatedPerson,
+      if (vehicleType != null) 'vehicle_type': vehicleType,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -504,6 +549,7 @@ class VehicleEntriesCompanion extends UpdateCompanion<VehicleRow> {
     Value<DateTime>? nextInspection,
     Value<int>? color,
     Value<String?>? associatedPerson,
+    Value<String>? vehicleType,
     Value<int>? rowid,
   }) {
     return VehicleEntriesCompanion(
@@ -516,6 +562,7 @@ class VehicleEntriesCompanion extends UpdateCompanion<VehicleRow> {
       nextInspection: nextInspection ?? this.nextInspection,
       color: color ?? this.color,
       associatedPerson: associatedPerson ?? this.associatedPerson,
+      vehicleType: vehicleType ?? this.vehicleType,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -550,6 +597,9 @@ class VehicleEntriesCompanion extends UpdateCompanion<VehicleRow> {
     if (associatedPerson.present) {
       map['associated_person'] = Variable<String>(associatedPerson.value);
     }
+    if (vehicleType.present) {
+      map['vehicle_type'] = Variable<String>(vehicleType.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -568,6 +618,7 @@ class VehicleEntriesCompanion extends UpdateCompanion<VehicleRow> {
           ..write('nextInspection: $nextInspection, ')
           ..write('color: $color, ')
           ..write('associatedPerson: $associatedPerson, ')
+          ..write('vehicleType: $vehicleType, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1790,6 +1841,7 @@ typedef $$VehicleEntriesTableCreateCompanionBuilder =
       required DateTime nextInspection,
       required int color,
       Value<String?> associatedPerson,
+      Value<String> vehicleType,
       Value<int> rowid,
     });
 typedef $$VehicleEntriesTableUpdateCompanionBuilder =
@@ -1803,6 +1855,7 @@ typedef $$VehicleEntriesTableUpdateCompanionBuilder =
       Value<DateTime> nextInspection,
       Value<int> color,
       Value<String?> associatedPerson,
+      Value<String> vehicleType,
       Value<int> rowid,
     });
 
@@ -1857,6 +1910,11 @@ class $$VehicleEntriesTableFilterComposer
 
   ColumnFilters<String> get associatedPerson => $composableBuilder(
     column: $table.associatedPerson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get vehicleType => $composableBuilder(
+    column: $table.vehicleType,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1914,6 +1972,11 @@ class $$VehicleEntriesTableOrderingComposer
     column: $table.associatedPerson,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get vehicleType => $composableBuilder(
+    column: $table.vehicleType,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$VehicleEntriesTableAnnotationComposer
@@ -1955,6 +2018,11 @@ class $$VehicleEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get associatedPerson => $composableBuilder(
     column: $table.associatedPerson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get vehicleType => $composableBuilder(
+    column: $table.vehicleType,
     builder: (column) => column,
   );
 }
@@ -2001,6 +2069,7 @@ class $$VehicleEntriesTableTableManager
                 Value<DateTime> nextInspection = const Value.absent(),
                 Value<int> color = const Value.absent(),
                 Value<String?> associatedPerson = const Value.absent(),
+                Value<String> vehicleType = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VehicleEntriesCompanion(
                 id: id,
@@ -2012,6 +2081,7 @@ class $$VehicleEntriesTableTableManager
                 nextInspection: nextInspection,
                 color: color,
                 associatedPerson: associatedPerson,
+                vehicleType: vehicleType,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2025,6 +2095,7 @@ class $$VehicleEntriesTableTableManager
                 required DateTime nextInspection,
                 required int color,
                 Value<String?> associatedPerson = const Value.absent(),
+                Value<String> vehicleType = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VehicleEntriesCompanion.insert(
                 id: id,
@@ -2036,6 +2107,7 @@ class $$VehicleEntriesTableTableManager
                 nextInspection: nextInspection,
                 color: color,
                 associatedPerson: associatedPerson,
+                vehicleType: vehicleType,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

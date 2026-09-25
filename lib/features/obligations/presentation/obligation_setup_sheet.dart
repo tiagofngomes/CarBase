@@ -73,6 +73,18 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
   bool get _isIuc => widget.type == RecordType.iuc;
   bool get _isInspection => widget.type == RecordType.inspection;
 
+  String get _dayLabel => _isIuc
+      ? 'Dia do IUC'
+      : _isInspection
+      ? 'Dia da próxima inspeção'
+      : 'Dia do próximo pagamento';
+
+  String get _monthLabel => _isIuc
+      ? 'Mês do IUC'
+      : _isInspection
+      ? 'Mês da próxima inspeção'
+      : 'Mês do próximo pagamento';
+
   @override
   void initState() {
     super.initState();
@@ -159,25 +171,6 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
               ),
               const SizedBox(height: 12),
             ],
-            DropdownButtonFormField<int>(
-              initialValue: _month,
-              borderRadius: BorderRadius.circular(18),
-              menuMaxHeight: 360,
-              decoration: InputDecoration(
-                labelText: _isIuc
-                    ? 'Mês do IUC'
-                    : _isInspection
-                    ? 'Mês da próxima inspeção'
-                    : 'Mês do próximo pagamento',
-                prefixIcon: const Icon(Icons.calendar_month_rounded),
-              ),
-              items: [
-                for (var i = 0; i < _months.length; i++)
-                  DropdownMenuItem(value: i + 1, child: Text(_months[i])),
-              ],
-              onChanged: (value) => setState(() => _month = value!),
-            ),
-            const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
                 color: AppColors.background,
@@ -194,7 +187,10 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
                   'Opcional. Sem um dia definido, os avisos serão apresentados durante o mês selecionado.',
                 ),
                 value: _hasExactDay,
-                onChanged: (value) => setState(() => _hasExactDay = value),
+                onChanged: (value) => setState(() {
+                  _hasExactDay = value;
+                  _dayError = null;
+                }),
               ),
             ),
             const SizedBox(height: 12),
@@ -206,7 +202,7 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
                   if (_dayError != null) setState(() => _dayError = null);
                 },
                 decoration: InputDecoration(
-                  labelText: 'Dia',
+                  labelText: _dayLabel,
                   hintText: '1 a 31',
                   prefixIcon: const Icon(Icons.today_rounded),
                   errorText: _dayError,
@@ -214,6 +210,24 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
               ),
               const SizedBox(height: 12),
             ],
+            DropdownButtonFormField<int>(
+              initialValue: _month,
+              borderRadius: BorderRadius.circular(18),
+              menuMaxHeight: 360,
+              decoration: InputDecoration(
+                labelText: _monthLabel,
+                prefixIcon: const Icon(Icons.calendar_month_rounded),
+              ),
+              items: [
+                for (var i = 0; i < _months.length; i++)
+                  DropdownMenuItem(value: i + 1, child: Text(_months[i])),
+              ],
+              onChanged: (value) => setState(() {
+                _month = value!;
+                _dayError = null;
+              }),
+            ),
+            const SizedBox(height: 12),
             Card(
               color: AppColors.blue.withValues(alpha: .06),
               child: Padding(

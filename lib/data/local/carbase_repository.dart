@@ -94,6 +94,7 @@ class CarBaseRepository {
             nextInspection: vehicle.nextInspection,
             color: vehicle.color,
             associatedPerson: Value(vehicle.associatedPerson),
+            vehicleType: Value(vehicle.type.name),
           ),
         );
   }
@@ -151,6 +152,10 @@ class CarBaseRepository {
     nextInspection: row.nextInspection,
     color: row.color,
     associatedPerson: row.associatedPerson,
+    type: VehicleType.values.firstWhere(
+      (type) => type.name == row.vehicleType,
+      orElse: () => VehicleType.car,
+    ),
   );
 
   RecurringObligation _obligationFromRow(ObligationRow row) =>

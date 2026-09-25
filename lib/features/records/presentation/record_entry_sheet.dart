@@ -127,10 +127,7 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.directions_car_rounded,
-                      color: AppColors.blue,
-                    ),
+                    Icon(widget.vehicle.type.icon, color: AppColors.blue),
                     const SizedBox(width: 11),
                     Expanded(
                       child: Column(

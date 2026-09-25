@@ -71,11 +71,7 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.directions_car_filled_rounded,
-                  color: Colors.white,
-                  size: 78,
-                ),
+                Icon(_vehicle.type.icon, color: Colors.white, size: 78),
                 const SizedBox(height: 12),
                 Text(
                   _vehicle.licensePlate,

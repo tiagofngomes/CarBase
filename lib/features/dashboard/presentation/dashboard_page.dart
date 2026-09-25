@@ -24,6 +24,7 @@ class DashboardPage extends StatefulWidget {
     required this.onVehicleChanged,
     required this.obligations,
     required this.events,
+    required this.onVehicleSaved,
     required this.onObligationSaved,
     required this.onObligationPaid,
     required this.onInspectionCompleted,
@@ -37,6 +38,7 @@ class DashboardPage extends StatefulWidget {
   final ValueChanged<String> onVehicleChanged;
   final List<RecurringObligation> obligations;
   final List<VehicleEvent> events;
+  final ValueChanged<Vehicle> onVehicleSaved;
   final ValueChanged<RecurringObligation> onObligationSaved;
   final void Function(
     RecurringObligation obligation,
@@ -142,11 +144,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 ],
               ),
               const SizedBox(height: 18),
-              const SectionHeader(title: 'Registo rápido'),
-              const SizedBox(height: 6),
               QuickActions(
                 vehicle: _selectedVehicle,
                 obligations: widget.obligations,
+                onVehicleSaved: widget.onVehicleSaved,
                 onObligationSaved: widget.onObligationSaved,
                 onEventSaved: widget.onEventSaved,
               ),

@@ -136,7 +136,7 @@ class _AppShellState extends State<AppShell> {
         title: isIuc ? 'IUC pago' : 'Seguro pago',
         subtitle: isIuc
             ? 'Pagamento anual registado'
-            : '${obligation.frequency.label} · ${obligation.provider ?? 'Seguro automóvel'}',
+            : '${obligation.frequency.label} · ${obligation.provider ?? 'Seguro do veículo'}',
         date: paidAt,
         type: obligation.type,
         amount: amount,
@@ -187,6 +187,7 @@ class _AppShellState extends State<AppShell> {
         vehicles: _vehicles,
         obligations: _obligations,
         events: _events,
+        onVehicleSaved: _saveVehicle,
         onEventSaved: _saveEvent,
         onEventDeleted: _deleteEvent,
         onObligationSaved: _saveObligation,

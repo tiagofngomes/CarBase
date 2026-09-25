@@ -29,6 +29,7 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
   late final TextEditingController _person;
   late final TextEditingController _mileage;
   late final TextEditingController _year;
+  late VehicleType _type;
 
   bool get _isEditing => widget.existing != null;
 
@@ -42,6 +43,7 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
     _person = TextEditingController(text: vehicle?.associatedPerson ?? '');
     _mileage = TextEditingController(text: vehicle?.mileage.toString() ?? '');
     _year = TextEditingController(text: vehicle?.year.toString() ?? '');
+    _type = vehicle?.type ?? VehicleType.car;
   }
 
   @override
@@ -94,6 +96,30 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
                 ),
               ],
               const SizedBox(height: 20),
+              DropdownButtonFormField<VehicleType>(
+                initialValue: _type,
+                borderRadius: BorderRadius.circular(18),
+                decoration: const InputDecoration(
+                  labelText: 'Tipo de veículo',
+                  prefixIcon: Icon(Icons.category_rounded),
+                ),
+                items: VehicleType.values
+                    .map(
+                      (type) => DropdownMenuItem(
+                        value: type,
+                        child: Row(
+                          children: [
+                            Icon(type.icon, size: 20),
+                            const SizedBox(width: 10),
+                            Text(type.label),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) => setState(() => _type = value!),
+              ),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(child: _field(_make, 'Marca')),
@@ -209,6 +235,7 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
         associatedPerson: _person.text.trim().isEmpty
             ? null
             : _person.text.trim(),
+        type: _type,
       ),
     );
   }

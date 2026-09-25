@@ -14,6 +14,7 @@ class VehicleEntries extends Table {
   DateTimeColumn get nextInspection => dateTime()();
   IntColumn get color => integer()();
   TextColumn get associatedPerson => text().nullable()();
+  TextColumn get vehicleType => text().withDefault(const Constant('car'))();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -69,5 +70,14 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (migrator, from, to) async {
+      if (from < 2) {
+        await migrator.addColumn(vehicleEntries, vehicleEntries.vehicleType);
+      }
+    },
+  );
 }
