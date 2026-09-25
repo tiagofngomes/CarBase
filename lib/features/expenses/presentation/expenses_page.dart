@@ -34,6 +34,7 @@ class ExpensesPage extends StatefulWidget {
 class _ExpensesPageState extends State<ExpensesPage> {
   String? _vehicleId;
   _ExpensePeriod _period = _ExpensePeriod.thisYear;
+  DateTime? _selectedMonth;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +43,17 @@ class _ExpensesPageState extends State<ExpensesPage> {
     final events = _eventsInRange(range);
     final total = _total(events);
     final months = _monthsInRange(range, events);
-    final categories = _categories(events);
+    final categoryEvents = _selectedMonth == null
+        ? events
+        : events
+              .where(
+                (event) =>
+                    event.date.year == _selectedMonth!.year &&
+                    event.date.month == _selectedMonth!.month,
+              )
+              .toList();
+    final categoryTotal = _total(categoryEvents);
+    final categories = _categories(categoryEvents);
     final comparison = _comparison(now, total);
 
     return ListView(
@@ -77,8 +88,10 @@ class _ExpensesPageState extends State<ExpensesPage> {
                       ),
                     ),
                 ],
-                onChanged: (value) =>
-                    setState(() => _vehicleId = value == 'all' ? null : value),
+                onChanged: (value) => setState(() {
+                  _vehicleId = value == 'all' ? null : value;
+                  _selectedMonth = null;
+                }),
               ),
             ),
             const SizedBox(width: 10),
@@ -102,7 +115,10 @@ class _ExpensesPageState extends State<ExpensesPage> {
                       ),
                     )
                     .toList(),
-                onChanged: (value) => setState(() => _period = value!),
+                onChanged: (value) => setState(() {
+                  _period = value!;
+                  _selectedMonth = null;
+                }),
               ),
             ),
           ],
@@ -114,17 +130,21 @@ class _ExpensesPageState extends State<ExpensesPage> {
           average: months.isEmpty ? 0 : total / months.length,
           recordCount: events.length,
           months: months,
+          selectedMonth: _selectedMonth,
+          onMonthSelected: (month) => setState(() => _selectedMonth = month),
         ),
         const SizedBox(height: 24),
         Row(
           children: [
             Text(
-              'Por categoria',
+              _selectedMonth == null
+                  ? 'Por categoria'
+                  : 'Por categoria · ${_monthName(_selectedMonth!.month)}',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const Spacer(),
             Text(
-              '${events.length} ${events.length == 1 ? 'registo' : 'registos'}',
+              '${categoryEvents.length} ${categoryEvents.length == 1 ? 'registo' : 'registos'}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -148,7 +168,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
                   for (var i = 0; i < categories.length; i++) ...[
                     _CategoryRow(
                       category: categories[i],
-                      total: total,
+                      total: categoryTotal,
                       onTap: () => _showCategoryDetails(categories[i]),
                     ),
                     if (i < categories.length - 1)
@@ -336,6 +356,21 @@ class _ExpensesPageState extends State<ExpensesPage> {
       ),
     );
   }
+
+  String _monthName(int month) => const [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ][month - 1];
 
   _DateRange _rangeFor(DateTime now, _ExpensePeriod period) {
     final end = DateTime(now.year, now.month, now.day + 1);

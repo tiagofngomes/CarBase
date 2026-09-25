@@ -18,6 +18,8 @@ class ExpenseSummary extends StatefulWidget {
     required this.average,
     required this.recordCount,
     required this.months,
+    required this.selectedMonth,
+    required this.onMonthSelected,
   });
 
   final double total;
@@ -25,29 +27,21 @@ class ExpenseSummary extends StatefulWidget {
   final double average;
   final int recordCount;
   final List<ExpenseMonthData> months;
+  final DateTime? selectedMonth;
+  final ValueChanged<DateTime?> onMonthSelected;
 
   @override
   State<ExpenseSummary> createState() => _ExpenseSummaryState();
 }
 
 class _ExpenseSummaryState extends State<ExpenseSummary> {
-  int? _selectedIndex;
-
   int get _activeIndex {
-    if (widget.months.isEmpty) return 0;
-    return (_selectedIndex ?? widget.months.length - 1).clamp(
-      0,
-      widget.months.length - 1,
+    if (widget.selectedMonth == null) return -1;
+    return widget.months.indexWhere(
+      (item) =>
+          item.month.year == widget.selectedMonth!.year &&
+          item.month.month == widget.selectedMonth!.month,
     );
-  }
-
-  @override
-  void didUpdateWidget(covariant ExpenseSummary oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.months.length != widget.months.length ||
-        oldWidget.periodLabel != widget.periodLabel) {
-      _selectedIndex = null;
-    }
   }
 
   @override
@@ -56,7 +50,7 @@ class _ExpenseSummaryState extends State<ExpenseSummary> {
       0,
       (maximum, item) => item.amount > maximum ? item.amount : maximum,
     );
-    final selected = widget.months.isEmpty ? null : widget.months[_activeIndex];
+    final selected = _activeIndex == -1 ? null : widget.months[_activeIndex];
 
     return Container(
       padding: const EdgeInsets.all(22),
@@ -69,54 +63,78 @@ class _ExpenseSummaryState extends State<ExpenseSummary> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Total · ${widget.periodLabel}',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: .7),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            Formatters.currency(widget.total),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 30,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -.7,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Média mensal ${Formatters.currency(widget.average)}  ·  '
-            '${widget.recordCount} ${widget.recordCount == 1 ? 'registo' : 'registos'}',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: .7),
-              fontSize: 12,
-            ),
-          ),
-          if (selected != null) ...[
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                Text(
-                  _monthName(selected.month.month),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: .72),
-                    fontSize: 12,
-                  ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total · ${widget.periodLabel}',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: .7),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      Formatters.currency(widget.total),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -.7,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Média mensal ${Formatters.currency(widget.average)}  ·  '
+                      '${widget.recordCount} ${widget.recordCount == 1 ? 'registo' : 'registos'}',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: .7),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                Text(
-                  Formatters.currency(selected.amount),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
+              ),
+              const SizedBox(width: 14),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    selected == null
+                        ? 'Evolução mensal'
+                        : _monthName(selected.month.month),
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: .72),
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
+                  const SizedBox(height: 4),
+                  Text(
+                    selected == null
+                        ? 'Toque numa barra'
+                        : Formatters.currency(selected.amount),
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: Colors.white.withValues(
+                        alpha: selected == null ? .7 : 1,
+                      ),
+                      fontWeight: selected == null
+                          ? FontWeight.w500
+                          : FontWeight.w700,
+                      fontSize: selected == null ? 11 : 14,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (widget.months.isNotEmpty) ...[
+            const SizedBox(height: 22),
             SizedBox(
               height: 82,
               child: Row(
@@ -125,7 +143,9 @@ class _ExpenseSummaryState extends State<ExpenseSummary> {
                   for (var i = 0; i < widget.months.length; i++)
                     Expanded(
                       child: InkWell(
-                        onTap: () => setState(() => _selectedIndex = i),
+                        onTap: () => widget.onMonthSelected(
+                          i == _activeIndex ? null : widget.months[i].month,
+                        ),
                         borderRadius: BorderRadius.circular(8),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 3),
