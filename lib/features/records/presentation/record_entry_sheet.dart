@@ -183,6 +183,37 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
                         _parseDate(text) == null) {
                       return 'Indique uma data válida';
                     }
+                    if (field.date && text.isNotEmpty) {
+                      final date = _parseDate(text)!;
+                      final today = DateTime.now();
+                      if (field.label == 'Data' &&
+                          date.isAfter(
+                            DateTime(today.year, today.month, today.day),
+                          )) {
+                        return 'A data não pode ser futura';
+                      }
+                      if (field.label == 'Próxima manutenção (opcional)') {
+                        final recordDate = _parseDate(_value('Data'));
+                        if (recordDate != null && !date.isAfter(recordDate)) {
+                          return 'Deve ser posterior à manutenção';
+                        }
+                      }
+                    }
+                    if (field.numeric && text.isNotEmpty) {
+                      final number = double.tryParse(text.replaceAll(',', '.'));
+                      if (number == null || !number.isFinite) {
+                        return 'Indique um número válido';
+                      }
+                      if (number < 0) return 'O valor não pode ser negativo';
+                      if (field.wholeNumber &&
+                          number != number.roundToDouble()) {
+                        return 'Indique um número inteiro';
+                      }
+                      if (field.label == 'Ano fiscal' &&
+                          (number < 2000 || number > DateTime.now().year + 1)) {
+                        return 'Indique um ano válido';
+                      }
+                    }
                     return null;
                   },
                 ),
@@ -247,7 +278,12 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
         hint: 'DD/MM/AAAA',
         date: true,
       ),
-      _FieldDefinition('Quilometragem', Icons.speed_rounded, numeric: true),
+      _FieldDefinition(
+        'Quilometragem',
+        Icons.speed_rounded,
+        numeric: true,
+        wholeNumber: true,
+      ),
       _FieldDefinition('Custo', Icons.euro_rounded, numeric: true),
       _FieldDefinition(
         'Próxima manutenção (opcional)',
@@ -261,6 +297,7 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
         'Ano fiscal',
         Icons.calendar_month_rounded,
         numeric: true,
+        wholeNumber: true,
       ),
       _FieldDefinition(
         'Estado',
@@ -406,6 +443,7 @@ class _FieldDefinition {
     this.numeric = false,
     this.required = true,
     this.date = false,
+    this.wholeNumber = false,
   });
 
   final String label;
@@ -414,4 +452,5 @@ class _FieldDefinition {
   final bool numeric;
   final bool required;
   final bool date;
+  final bool wholeNumber;
 }

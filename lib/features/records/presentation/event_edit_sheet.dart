@@ -23,6 +23,7 @@ class EventEditSheet extends StatefulWidget {
 }
 
 class _EventEditSheetState extends State<EventEditSheet> {
+  final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
   late final TextEditingController _amountController;
   late final TextEditingController _notesController;
@@ -57,74 +58,89 @@ class _EventEditSheetState extends State<EventEditSheet> {
         24 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(2),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 22),
-            Text(
-              'Editar registo',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Descrição',
-                prefixIcon: Icon(Icons.edit_rounded),
+              const SizedBox(height: 22),
+              Text(
+                'Editar registo',
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _amountController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: const InputDecoration(
-                labelText: 'Valor',
-                prefixIcon: Icon(Icons.euro_rounded),
-              ),
-            ),
-            const SizedBox(height: 12),
-            InkWell(
-              onTap: _selectDate,
-              borderRadius: BorderRadius.circular(16),
-              child: InputDecorator(
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _titleController,
                 decoration: const InputDecoration(
-                  labelText: 'Data',
-                  prefixIcon: Icon(Icons.calendar_today_rounded),
+                  labelText: 'Descrição',
+                  prefixIcon: Icon(Icons.edit_rounded),
                 ),
-                child: Text(Formatters.fullDate(_date)),
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Indique uma descrição'
+                    : null,
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _notesController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Notas (opcional)',
-                prefixIcon: Icon(Icons.notes_rounded),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _amountController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Valor',
+                  prefixIcon: Icon(Icons.euro_rounded),
+                ),
+                validator: (value) {
+                  final text = value?.trim() ?? '';
+                  if (text.isEmpty) return null;
+                  final amount = double.tryParse(text.replaceAll(',', '.'));
+                  if (amount == null || !amount.isFinite) {
+                    return 'Indique um valor válido';
+                  }
+                  return amount < 0 ? 'O valor não pode ser negativo' : null;
+                },
               ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _save,
-                child: const Text('Guardar alterações'),
+              const SizedBox(height: 12),
+              InkWell(
+                onTap: _selectDate,
+                borderRadius: BorderRadius.circular(16),
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Data',
+                    prefixIcon: Icon(Icons.calendar_today_rounded),
+                  ),
+                  child: Text(Formatters.fullDate(_date)),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              TextField(
+                controller: _notesController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Notas (opcional)',
+                  prefixIcon: Icon(Icons.notes_rounded),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _save,
+                  child: const Text('Guardar alterações'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -141,8 +157,8 @@ class _EventEditSheetState extends State<EventEditSheet> {
   }
 
   void _save() {
+    if (!_formKey.currentState!.validate()) return;
     final title = _titleController.text.trim();
-    if (title.isEmpty) return;
     Navigator.pop(
       context,
       widget.event.copyWith(

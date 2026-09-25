@@ -174,6 +174,15 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
               if (numeric && int.tryParse(value.trim()) == null) {
                 return 'Indique um número válido';
               }
+              if (label == 'Ano') {
+                final year = int.parse(value.trim());
+                if (year < 1886 || year > DateTime.now().year + 1) {
+                  return 'Indique um ano válido';
+                }
+              }
+              if (label == 'Quilometragem' && int.parse(value.trim()) < 0) {
+                return 'Não pode ser negativa';
+              }
               return null;
             }
           : null,

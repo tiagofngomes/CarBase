@@ -65,6 +65,7 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
   late bool _remindMonthBefore;
   late bool _remindDueMonth;
   bool _showAdditionalInfo = false;
+  String? _dayError;
   late final TextEditingController _dayController;
   late final TextEditingController _providerController;
   late final TextEditingController _notesController;
@@ -201,10 +202,14 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
               TextField(
                 controller: _dayController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                onChanged: (_) {
+                  if (_dayError != null) setState(() => _dayError = null);
+                },
+                decoration: InputDecoration(
                   labelText: 'Dia',
                   hintText: '1 a 31',
-                  prefixIcon: Icon(Icons.today_rounded),
+                  prefixIcon: const Icon(Icons.today_rounded),
+                  errorText: _dayError,
                 ),
               ),
               const SizedBox(height: 12),
@@ -353,7 +358,13 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
   void _save() {
     final now = DateTime.now();
     final enteredDay = int.tryParse(_dayController.text);
-    final day = _hasExactDay ? (enteredDay ?? 1).clamp(1, 28) : 1;
+    final lastDay = DateTime(now.year, _month + 1, 0).day;
+    if (_hasExactDay &&
+        (enteredDay == null || enteredDay < 1 || enteredDay > lastDay)) {
+      setState(() => _dayError = 'Indique um dia entre 1 e $lastDay');
+      return;
+    }
+    final day = _hasExactDay ? enteredDay! : 1;
     var year = now.year;
     var dueDate = DateTime(year, _month, day);
     if (dueDate.isBefore(DateTime(now.year, now.month, now.day))) {

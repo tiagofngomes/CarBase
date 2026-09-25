@@ -104,9 +104,10 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
                 final amount = double.tryParse(
                   (value ?? '').replaceAll(',', '.'),
                 );
-                return amount == null || amount <= 0
-                    ? 'Indique o valor pago'
-                    : null;
+                if (amount == null || !amount.isFinite) {
+                  return 'Indique um valor válido';
+                }
+                return amount < 0 ? 'O valor não pode ser negativo' : null;
               },
             ),
             const SizedBox(height: 12),

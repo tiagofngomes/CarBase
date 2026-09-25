@@ -47,6 +47,7 @@ class _InspectionCompletionSheetState extends State<InspectionCompletionSheet> {
     _completedAt.day,
   );
   String _result = 'Aprovado';
+  String? _nextInspectionError;
 
   @override
   void dispose() {
@@ -123,6 +124,7 @@ class _InspectionCompletionSheetState extends State<InspectionCompletionSheet> {
                 label: 'Próxima inspeção',
                 value: _nextInspection,
                 onTap: () => _selectDate(isNext: true),
+                errorText: _nextInspectionError,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -138,9 +140,10 @@ class _InspectionCompletionSheetState extends State<InspectionCompletionSheet> {
                   final parsed = double.tryParse(
                     (value ?? '').replaceAll(',', '.'),
                   );
-                  return parsed == null || parsed <= 0
-                      ? 'Indique o valor pago'
-                      : null;
+                  if (parsed == null || !parsed.isFinite) {
+                    return 'Indique um valor válido';
+                  }
+                  return parsed < 0 ? 'O valor não pode ser negativo' : null;
                 },
               ),
               const SizedBox(height: 12),
@@ -179,14 +182,23 @@ class _InspectionCompletionSheetState extends State<InspectionCompletionSheet> {
     setState(() {
       if (isNext) {
         _nextInspection = date;
+        _nextInspectionError = null;
       } else {
         _completedAt = date;
+        _nextInspectionError = null;
       }
     });
   }
 
   void _save() {
     if (!_formKey.currentState!.validate()) return;
+    if (!_nextInspection.isAfter(_completedAt)) {
+      setState(() {
+        _nextInspectionError =
+            'A próxima inspeção deve ser posterior à inspeção atual';
+      });
+      return;
+    }
     Navigator.pop(
       context,
       InspectionCompletion(
@@ -205,11 +217,13 @@ class _DateField extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onTap,
+    this.errorText,
   });
 
   final String label;
   final DateTime value;
   final VoidCallback onTap;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -220,6 +234,7 @@ class _DateField extends StatelessWidget {
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: const Icon(Icons.calendar_today_rounded),
+          errorText: errorText,
         ),
         child: Text(Formatters.fullDate(value)),
       ),
