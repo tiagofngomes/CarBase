@@ -2,19 +2,28 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/models/record_type.dart';
-import '../../../data/demo_data.dart';
+import '../../../core/models/vehicle.dart';
 
 class RecordEntrySheet extends StatefulWidget {
-  const RecordEntrySheet({super.key, required this.type});
+  const RecordEntrySheet({
+    super.key,
+    required this.type,
+    required this.vehicle,
+  });
 
   final RecordType type;
+  final Vehicle vehicle;
 
-  static Future<void> show(BuildContext context, RecordType type) {
+  static Future<void> show(
+    BuildContext context,
+    RecordType type,
+    Vehicle vehicle,
+  ) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => RecordEntrySheet(type: type),
+      builder: (_) => RecordEntrySheet(type: type, vehicle: vehicle),
     );
   }
 
@@ -83,23 +92,43 @@ class _RecordEntrySheetState extends State<RecordEntrySheet> {
                 ],
               ),
               const SizedBox(height: 22),
-              DropdownButtonFormField<String>(
-                initialValue: DemoData.vehicles.first.id,
-                decoration: const InputDecoration(
-                  labelText: 'Veículo',
-                  prefixIcon: Icon(Icons.directions_car_rounded),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
                 ),
-                items: DemoData.vehicles
-                    .map(
-                      (vehicle) => DropdownMenuItem(
-                        value: vehicle.id,
-                        child: Text(
-                          '${vehicle.displayName} · ${vehicle.licensePlate}',
-                        ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.directions_car_rounded,
+                      color: AppColors.blue,
+                    ),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.vehicle.displayName,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          Text(
+                            '${widget.vehicle.licensePlate} · ${widget.vehicle.associationLabel}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
                       ),
-                    )
-                    .toList(),
-                onChanged: (_) {},
+                    ),
+                    const Icon(
+                      Icons.lock_rounded,
+                      size: 17,
+                      color: AppColors.muted,
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
               for (final field in fields) ...[

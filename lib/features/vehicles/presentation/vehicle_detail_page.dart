@@ -2,17 +2,25 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/models/vehicle.dart';
+import '../../../core/models/vehicle_event.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../data/demo_data.dart';
 import '../../dashboard/presentation/widgets/event_tile.dart';
 
 class VehicleDetailPage extends StatelessWidget {
-  const VehicleDetailPage({super.key, required this.vehicle});
+  const VehicleDetailPage({
+    super.key,
+    required this.vehicle,
+    required this.events,
+  });
 
   final Vehicle vehicle;
+  final List<VehicleEvent> events;
 
   @override
   Widget build(BuildContext context) {
+    final vehicleEvents = events
+        .where((event) => event.vehicleId == vehicle.id)
+        .toList();
     return Scaffold(
       appBar: AppBar(
         title: Text(vehicle.displayName),
@@ -71,6 +79,12 @@ class VehicleDetailPage extends StatelessWidget {
                   ),
                   const Divider(height: 28),
                   _InfoRow(
+                    icon: Icons.person_rounded,
+                    label: 'Associado a',
+                    value: vehicle.associationLabel,
+                  ),
+                  const Divider(height: 28),
+                  _InfoRow(
                     icon: Icons.fact_check_rounded,
                     label: 'Próxima inspeção',
                     value: Formatters.fullDate(vehicle.nextInspection),
@@ -90,10 +104,10 @@ class VehicleDetailPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  for (var i = 0; i < DemoData.events.length; i++)
+                  for (var i = 0; i < vehicleEvents.length; i++)
                     EventTile(
-                      event: DemoData.events[i],
-                      showDivider: i < DemoData.events.length - 1,
+                      event: vehicleEvents[i],
+                      showDivider: i < vehicleEvents.length - 1,
                     ),
                 ],
               ),

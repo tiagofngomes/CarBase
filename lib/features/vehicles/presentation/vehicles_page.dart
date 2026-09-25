@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/demo_data.dart';
+import '../../../core/models/vehicle_event.dart';
 import '../../../shared/widgets/page_header.dart';
 import 'vehicle_detail_page.dart';
 import 'widgets/vehicle_card.dart';
 
 class VehiclesPage extends StatelessWidget {
-  const VehiclesPage({super.key});
+  const VehiclesPage({super.key, required this.events});
+
+  final List<VehicleEvent> events;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +33,8 @@ class VehiclesPage extends StatelessWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => VehicleDetailPage(vehicle: vehicle),
+                builder: (_) =>
+                    VehicleDetailPage(vehicle: vehicle, events: events),
               ),
             ),
           ),
@@ -81,6 +85,14 @@ class VehiclesPage extends StatelessWidget {
               decoration: InputDecoration(
                 labelText: 'Matrícula',
                 prefixIcon: Icon(Icons.pin_rounded),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const TextField(
+              decoration: InputDecoration(
+                labelText: 'Associado a (opcional)',
+                hintText: 'Ex.: Miguel, esposa, filho',
+                prefixIcon: Icon(Icons.person_rounded),
               ),
             ),
             const SizedBox(height: 12),

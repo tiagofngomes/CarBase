@@ -4,6 +4,7 @@ import 'record_type.dart';
 
 class VehicleEvent {
   const VehicleEvent({
+    required this.vehicleId,
     required this.title,
     required this.subtitle,
     required this.date,
@@ -11,6 +12,7 @@ class VehicleEvent {
     this.amount,
   });
 
+  final String vehicleId;
   final String title;
   final String subtitle;
   final DateTime date;

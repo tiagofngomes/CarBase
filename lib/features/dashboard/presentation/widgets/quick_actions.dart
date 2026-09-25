@@ -2,10 +2,22 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/models/record_type.dart';
+import '../../../../core/models/recurring_obligation.dart';
+import '../../../../core/models/vehicle.dart';
+import '../../../obligations/presentation/obligation_setup_sheet.dart';
 import '../../../records/presentation/record_entry_sheet.dart';
 
 class QuickActions extends StatelessWidget {
-  const QuickActions({super.key});
+  const QuickActions({
+    super.key,
+    required this.vehicle,
+    required this.obligations,
+    required this.onObligationSaved,
+  });
+
+  final Vehicle vehicle;
+  final List<RecurringObligation> obligations;
+  final ValueChanged<RecurringObligation> onObligationSaved;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +35,7 @@ class QuickActions extends StatelessWidget {
             (action) => Expanded(
               child: InkWell(
                 borderRadius: BorderRadius.circular(18),
-                onTap: () => RecordEntrySheet.show(context, action.$1),
+                onTap: () => _openAction(context, action.$1),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Column(
@@ -55,5 +67,22 @@ class QuickActions extends StatelessWidget {
           )
           .toList(),
     );
+  }
+
+  void _openAction(BuildContext context, RecordType type) {
+    if (type == RecordType.iuc || type == RecordType.insurance) {
+      final matching = obligations.where(
+        (item) => item.vehicleId == vehicle.id && item.type == type,
+      );
+      ObligationSetupSheet.show(
+        context: context,
+        vehicle: vehicle,
+        type: type,
+        existing: matching.isEmpty ? null : matching.first,
+        onSave: onObligationSaved,
+      );
+      return;
+    }
+    RecordEntrySheet.show(context, type, vehicle);
   }
 }

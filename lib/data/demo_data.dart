@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app/theme/app_colors.dart';
 import '../core/models/expense.dart';
 import '../core/models/record_type.dart';
+import '../core/models/recurring_obligation.dart';
 import '../core/models/vehicle.dart';
 import '../core/models/vehicle_event.dart';
 
@@ -17,6 +18,7 @@ abstract final class DemoData {
       mileage: 68420,
       nextInspection: DateTime(2026, 11, 18),
       color: 0xFF244A68,
+      associatedPerson: 'Miguel',
     ),
     Vehicle(
       id: '2',
@@ -27,11 +29,13 @@ abstract final class DemoData {
       mileage: 112830,
       nextInspection: DateTime(2027, 2, 6),
       color: 0xFF667884,
+      associatedPerson: 'Ana',
     ),
   ];
 
   static final events = [
     VehicleEvent(
+      vehicleId: '1',
       title: 'Mudança de óleo e filtros',
       subtitle: 'Auto Silva · 68.420 km',
       date: DateTime(2026, 9, 18),
@@ -39,6 +43,7 @@ abstract final class DemoData {
       amount: 189.90,
     ),
     VehicleEvent(
+      vehicleId: '1',
       title: 'Renovação do seguro',
       subtitle: 'Fidelidade · Apólice 4829017',
       date: DateTime(2026, 9, 12),
@@ -46,6 +51,7 @@ abstract final class DemoData {
       amount: 326.80,
     ),
     VehicleEvent(
+      vehicleId: '2',
       title: 'Inspeção periódica',
       subtitle: 'Aprovado sem anotações',
       date: DateTime(2026, 8, 27),
@@ -53,13 +59,14 @@ abstract final class DemoData {
       amount: 35.89,
     ),
     VehicleEvent(
+      vehicleId: '1',
       title: 'IUC 2026',
       subtitle: 'Pago · Autoridade Tributária',
       date: DateTime(2026, 7, 8),
       type: RecordType.iuc,
-      amount: 148.42,
     ),
     VehicleEvent(
+      vehicleId: '2',
       title: 'Estacionamento mensal',
       subtitle: 'Parque da Estação',
       date: DateTime(2026, 6, 30),
@@ -98,6 +105,41 @@ abstract final class DemoData {
       amount: 86.20,
       icon: Icons.receipt_long_rounded,
       color: AppColors.danger,
+    ),
+  ];
+
+  static final obligations = [
+    RecurringObligation(
+      id: '1-iuc',
+      vehicleId: '1',
+      type: RecordType.iuc,
+      frequency: PaymentFrequency.annual,
+      nextDueDate: DateTime(2027, 1, 1),
+      hasExactDay: false,
+    ),
+    RecurringObligation(
+      id: '1-insurance',
+      vehicleId: '1',
+      type: RecordType.insurance,
+      frequency: PaymentFrequency.semiannual,
+      nextDueDate: DateTime(2026, 12, 4),
+      provider: 'Fidelidade',
+    ),
+    RecurringObligation(
+      id: '2-iuc',
+      vehicleId: '2',
+      type: RecordType.iuc,
+      frequency: PaymentFrequency.annual,
+      nextDueDate: DateTime(2027, 2, 1),
+      hasExactDay: false,
+    ),
+    RecurringObligation(
+      id: '2-insurance',
+      vehicleId: '2',
+      type: RecordType.insurance,
+      frequency: PaymentFrequency.quarterly,
+      nextDueDate: DateTime(2026, 10, 15),
+      provider: 'Ageas',
     ),
   ];
 }

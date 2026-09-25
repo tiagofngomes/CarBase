@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/models/record_type.dart';
+import '../../../core/models/vehicle_event.dart';
 import '../../../data/demo_data.dart';
 import '../../../shared/widgets/page_header.dart';
 import '../../dashboard/presentation/widgets/event_tile.dart';
 
 class ActivityPage extends StatefulWidget {
-  const ActivityPage({super.key});
+  const ActivityPage({super.key, required this.events});
+
+  final List<VehicleEvent> events;
 
   @override
   State<ActivityPage> createState() => _ActivityPageState();
@@ -15,12 +18,16 @@ class ActivityPage extends StatefulWidget {
 
 class _ActivityPageState extends State<ActivityPage> {
   RecordType? _filter;
+  String? _vehicleId;
 
   @override
   Widget build(BuildContext context) {
-    final events = _filter == null
-        ? DemoData.events
-        : DemoData.events.where((event) => event.type == _filter).toList();
+    final events = widget.events.where((event) {
+      final matchesVehicle =
+          _vehicleId == null || event.vehicleId == _vehicleId;
+      final matchesType = _filter == null || event.type == _filter;
+      return matchesVehicle && matchesType;
+    }).toList();
 
     return ListView(
       key: const PageStorageKey('activity'),
@@ -31,6 +38,29 @@ class _ActivityPageState extends State<ActivityPage> {
           subtitle: 'Todos os acontecimentos dos seus veículos',
         ),
         const SizedBox(height: 22),
+        Text('Veículo', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _FilterChip(
+                label: 'Todos',
+                selected: _vehicleId == null,
+                onTap: () => setState(() => _vehicleId = null),
+              ),
+              for (final vehicle in DemoData.vehicles)
+                _FilterChip(
+                  label: '${vehicle.displayName} · ${vehicle.associationLabel}',
+                  selected: _vehicleId == vehicle.id,
+                  onTap: () => setState(() => _vehicleId = vehicle.id),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text('Tipo de registo', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(

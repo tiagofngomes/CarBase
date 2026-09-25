@@ -37,7 +37,7 @@ class VehicleHeroCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'O meu veículo',
+                  'Associado a ${vehicle.associationLabel}',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: .72),
                     fontWeight: FontWeight.w600,

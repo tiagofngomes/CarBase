@@ -47,7 +47,7 @@ class VehicleCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          '${vehicle.licensePlate}  ·  ${vehicle.year}',
+                          '${vehicle.licensePlate}  ·  ${vehicle.year}  ·  ${vehicle.associationLabel}',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
