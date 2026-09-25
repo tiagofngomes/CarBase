@@ -148,6 +148,36 @@ class _AppShellState extends State<AppShell> {
     unawaited(widget.repository.saveEvent(paymentEvent));
   }
 
+  void _completeInspection(
+    RecurringObligation obligation,
+    DateTime completedAt,
+    DateTime nextInspection,
+    String result,
+    double amount,
+    String? notes,
+  ) {
+    final updated = obligation.copyWith(nextDueDate: nextInspection);
+    final event = VehicleEvent(
+      id: 'inspection-${DateTime.now().microsecondsSinceEpoch}',
+      vehicleId: obligation.vehicleId,
+      title: 'Inspeção periódica',
+      subtitle:
+          '$result · Próxima em ${nextInspection.month}/${nextInspection.year}',
+      date: completedAt,
+      type: RecordType.inspection,
+      amount: amount,
+      notes: notes,
+      obligationId: obligation.id,
+    );
+    setState(() {
+      final index = _obligations.indexWhere((item) => item.id == obligation.id);
+      if (index != -1) _obligations[index] = updated;
+      _events.insert(0, event);
+    });
+    unawaited(widget.repository.saveObligation(updated));
+    unawaited(widget.repository.saveEvent(event));
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = [
@@ -160,6 +190,7 @@ class _AppShellState extends State<AppShell> {
         onEventDeleted: _deleteEvent,
         onObligationSaved: _saveObligation,
         onObligationPaid: _markObligationPaid,
+        onInspectionCompleted: _completeInspection,
         onVehicleChanged: (vehicleId) {
           setState(() => _selectedVehicleId = vehicleId);
         },

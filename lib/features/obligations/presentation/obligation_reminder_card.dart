@@ -35,7 +35,10 @@ class ObligationReminderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = obligation.type == RecordType.iuc
         ? AppColors.navy
+        : obligation.type == RecordType.inspection
+        ? AppColors.warning
         : AppColors.blue;
+    final isInspection = obligation.type == RecordType.inspection;
 
     return Card(
       child: Padding(
@@ -73,7 +76,9 @@ class ObligationReminderCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${obligation.frequency.label} · $_dueLabel',
+                        isInspection
+                            ? 'Próxima inspeção · $_dueLabel'
+                            : '${obligation.frequency.label} · $_dueLabel',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -108,8 +113,15 @@ class ObligationReminderCard extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: TextButton.icon(
                 onPressed: onPaid,
-                icon: const Icon(Icons.check_circle_outline_rounded, size: 19),
-                label: const Text('Marcar como pago'),
+                icon: Icon(
+                  isInspection
+                      ? Icons.fact_check_outlined
+                      : Icons.check_circle_outline_rounded,
+                  size: 19,
+                ),
+                label: Text(
+                  isInspection ? 'Registar inspeção' : 'Marcar como pago',
+                ),
               ),
             ),
           ],

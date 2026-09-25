@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'app/app.dart';
-import 'data/local/app_database.dart';
-import 'data/local/carbase_repository.dart';
+import 'app/bootstrap.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  final repository = CarBaseRepository(AppDatabase());
-  final initialData = await repository.initialize();
-  runApp(CarBaseApp(repository: repository, initialData: initialData));
+  runApp(const CarBaseBootstrap());
 }

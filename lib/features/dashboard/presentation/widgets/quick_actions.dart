@@ -28,52 +28,60 @@ class QuickActions extends StatelessWidget {
       (RecordType.maintenance, AppColors.warning),
       (RecordType.iuc, AppColors.navy),
       (RecordType.insurance, AppColors.blue),
+      (RecordType.inspection, AppColors.brightBlue),
       (RecordType.otherExpense, AppColors.success),
     ];
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: actions
-          .map(
-            (action) => Expanded(
-              child: InkWell(
-                borderRadius: BorderRadius.circular(18),
-                onTap: () => _openAction(context, action.$1),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: action.$2.withValues(alpha: .1),
-                          borderRadius: BorderRadius.circular(17),
-                        ),
-                        child: Icon(action.$1.icon, color: action.$2),
+    return SizedBox(
+      height: 92,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: actions.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 6),
+        itemBuilder: (context, index) {
+          final action = actions[index];
+          return SizedBox(
+            width: 78,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: () => _openAction(context, action.$1),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: action.$2.withValues(alpha: .1),
+                        borderRadius: BorderRadius.circular(17),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        action.$1.label,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: Icon(action.$1.icon, color: action.$2),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      action.$1.label,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          )
-          .toList(),
+          );
+        },
+      ),
     );
   }
 
   void _openAction(BuildContext context, RecordType type) {
-    if (type == RecordType.iuc || type == RecordType.insurance) {
+    if (type == RecordType.iuc ||
+        type == RecordType.insurance ||
+        type == RecordType.inspection) {
       final matching = obligations.where(
         (item) => item.vehicleId == vehicle.id && item.type == type,
       );

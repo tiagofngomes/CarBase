@@ -131,6 +131,13 @@ abstract final class DemoData {
       provider: 'Fidelidade',
     ),
     RecurringObligation(
+      id: '1-inspection',
+      vehicleId: '1',
+      type: RecordType.inspection,
+      frequency: PaymentFrequency.annual,
+      nextDueDate: DateTime(2026, 11, 18),
+    ),
+    RecurringObligation(
       id: '2-iuc',
       vehicleId: '2',
       type: RecordType.iuc,
@@ -145,6 +152,13 @@ abstract final class DemoData {
       frequency: PaymentFrequency.quarterly,
       nextDueDate: DateTime(2026, 10, 15),
       provider: 'Ageas',
+    ),
+    RecurringObligation(
+      id: '2-inspection',
+      vehicleId: '2',
+      type: RecordType.inspection,
+      frequency: PaymentFrequency.annual,
+      nextDueDate: DateTime(2027, 2, 6),
     ),
   ];
 }

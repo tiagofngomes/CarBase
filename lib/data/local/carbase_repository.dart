@@ -41,6 +41,26 @@ class CarBaseRepository {
         }
       });
     }
+    final vehicles = await database.select(database.vehicleEntries).get();
+    final obligations = await database.select(database.obligationEntries).get();
+    for (final vehicle in vehicles) {
+      final hasInspection = obligations.any(
+        (item) =>
+            item.vehicleId == vehicle.id &&
+            item.type == RecordType.inspection.name,
+      );
+      if (!hasInspection && (vehicle.id == '1' || vehicle.id == '2')) {
+        await saveObligation(
+          RecurringObligation(
+            id: '${vehicle.id}-inspection',
+            vehicleId: vehicle.id,
+            type: RecordType.inspection,
+            frequency: PaymentFrequency.annual,
+            nextDueDate: vehicle.nextInspection,
+          ),
+        );
+      }
+    }
     return load();
   }
 

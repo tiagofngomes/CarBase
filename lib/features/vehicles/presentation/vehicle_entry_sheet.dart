@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/models/vehicle.dart';
-import '../../../core/utils/formatters.dart';
 
 class VehicleEntrySheet extends StatefulWidget {
   const VehicleEntrySheet({super.key});
@@ -28,7 +27,6 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
   final _person = TextEditingController();
   final _mileage = TextEditingController();
   final _year = TextEditingController();
-  late DateTime _inspection = DateTime.now().add(const Duration(days: 365));
 
   @override
   void dispose() {
@@ -112,18 +110,6 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              InkWell(
-                onTap: _selectInspection,
-                borderRadius: BorderRadius.circular(16),
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Próxima inspeção',
-                    prefixIcon: Icon(Icons.fact_check_rounded),
-                  ),
-                  child: Text(Formatters.fullDate(_inspection)),
-                ),
-              ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
@@ -163,16 +149,6 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
     );
   }
 
-  Future<void> _selectInspection() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _inspection,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 3650)),
-    );
-    if (date != null) setState(() => _inspection = date);
-  }
-
   void _save() {
     if (!_formKey.currentState!.validate()) return;
     Navigator.pop(
@@ -184,7 +160,7 @@ class _VehicleEntrySheetState extends State<VehicleEntrySheet> {
         year: int.tryParse(_year.text) ?? DateTime.now().year,
         licensePlate: _plate.text.trim().toUpperCase(),
         mileage: int.tryParse(_mileage.text) ?? 0,
-        nextInspection: _inspection,
+        nextInspection: DateTime.now().add(const Duration(days: 365)),
         color: AppColors.navy.toARGB32(),
         associatedPerson: _person.text.trim().isEmpty
             ? null

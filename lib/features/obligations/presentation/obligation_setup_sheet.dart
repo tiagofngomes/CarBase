@@ -70,6 +70,7 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
   late final TextEditingController _notesController;
 
   bool get _isIuc => widget.type == RecordType.iuc;
+  bool get _isInspection => widget.type == RecordType.inspection;
 
   @override
   void initState() {
@@ -77,7 +78,7 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
     final existing = widget.existing;
     _month = existing?.nextDueDate.month ?? DateTime.now().month;
     _hasExactDay = existing?.hasExactDay ?? false;
-    _frequency = _isIuc
+    _frequency = _isIuc || _isInspection
         ? PaymentFrequency.annual
         : existing?.frequency ?? PaymentFrequency.annual;
     _remindMonthBefore = existing?.remindMonthBefore ?? true;
@@ -136,7 +137,7 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 22),
-            if (!_isIuc) ...[
+            if (!_isIuc && !_isInspection) ...[
               DropdownButtonFormField<PaymentFrequency>(
                 initialValue: _frequency,
                 borderRadius: BorderRadius.circular(18),
@@ -162,7 +163,11 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
               borderRadius: BorderRadius.circular(18),
               menuMaxHeight: 360,
               decoration: InputDecoration(
-                labelText: _isIuc ? 'Mês do IUC' : 'Mês do próximo pagamento',
+                labelText: _isIuc
+                    ? 'Mês do IUC'
+                    : _isInspection
+                    ? 'Mês da próxima inspeção'
+                    : 'Mês do próximo pagamento',
                 prefixIcon: const Icon(Icons.calendar_month_rounded),
               ),
               items: [
@@ -245,7 +250,7 @@ class _ObligationSetupSheetState extends State<ObligationSetupSheet> {
                 ),
               ),
             ),
-            if (!_isIuc) ...[
+            if (!_isIuc && !_isInspection) ...[
               const SizedBox(height: 12),
               Container(
                 decoration: BoxDecoration(

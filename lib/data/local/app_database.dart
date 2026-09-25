@@ -57,7 +57,16 @@ class EventEntries extends Table {
 @DriftDatabase(tables: [VehicleEntries, ObligationEntries, EventEntries])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
-    : super(executor ?? driftDatabase(name: 'carbase'));
+    : super(
+        executor ??
+            driftDatabase(
+              name: 'carbase',
+              web: DriftWebOptions(
+                sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+                driftWorker: Uri.parse('drift_worker.js'),
+              ),
+            ),
+      );
 
   @override
   int get schemaVersion => 1;

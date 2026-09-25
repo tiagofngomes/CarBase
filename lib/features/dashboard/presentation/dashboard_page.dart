@@ -9,11 +9,11 @@ import '../../../shared/widgets/section_header.dart';
 import '../../obligations/presentation/obligation_reminder_card.dart';
 import '../../obligations/presentation/obligation_setup_sheet.dart';
 import '../../obligations/presentation/payment_confirmation_sheet.dart';
+import '../../obligations/presentation/inspection_completion_sheet.dart';
 import '../../records/presentation/event_actions.dart';
 import 'widgets/dashboard_header.dart';
 import 'widgets/event_tile.dart';
 import 'widgets/quick_actions.dart';
-import 'widgets/upcoming_card.dart';
 import 'widgets/vehicle_hero_card.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -26,6 +26,7 @@ class DashboardPage extends StatefulWidget {
     required this.events,
     required this.onObligationSaved,
     required this.onObligationPaid,
+    required this.onInspectionCompleted,
     required this.onEventSaved,
     required this.onEventDeleted,
   });
@@ -43,6 +44,15 @@ class DashboardPage extends StatefulWidget {
     String? notes,
   )
   onObligationPaid;
+  final void Function(
+    RecurringObligation obligation,
+    DateTime completedAt,
+    DateTime nextInspection,
+    String result,
+    double amount,
+    String? notes,
+  )
+  onInspectionCompleted;
   final ValueChanged<VehicleEvent> onEventSaved;
   final ValueChanged<VehicleEvent> onEventDeleted;
 
@@ -141,19 +151,11 @@ class _DashboardPageState extends State<DashboardPage> {
               const SizedBox(height: 24),
               const SectionHeader(title: 'Próximos compromissos'),
               const SizedBox(height: 12),
-              UpcomingCard(
-                title: 'Inspeção periódica',
-                date: _selectedVehicle.nextInspection,
-                icon: Icons.fact_check_rounded,
-                color: AppColors.warning,
-                caption: _selectedVehicle.licensePlate,
-              ),
-              const SizedBox(height: 10),
               for (final obligation in vehicleObligations) ...[
                 const SizedBox(height: 10),
                 ObligationReminderCard(
                   obligation: obligation,
-                  onPaid: () => _markAsPaid(context, obligation),
+                  onPaid: () => _completeObligation(context, obligation),
                   onEdit: () => _editObligation(context, obligation),
                 ),
               ],
@@ -210,10 +212,26 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Future<void> _markAsPaid(
+  Future<void> _completeObligation(
     BuildContext context,
     RecurringObligation obligation,
   ) async {
+    if (obligation.type == RecordType.inspection) {
+      final inspection = await InspectionCompletionSheet.show(context);
+      if (inspection == null || !context.mounted) return;
+      widget.onInspectionCompleted(
+        obligation,
+        inspection.completedAt,
+        inspection.nextInspection,
+        inspection.result,
+        inspection.amount,
+        inspection.notes,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Inspeção registada com sucesso.')),
+      );
+      return;
+    }
     final payment = await PaymentConfirmationSheet.show(context, obligation);
     if (payment == null || !context.mounted) return;
     widget.onObligationPaid(
