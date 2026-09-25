@@ -5,7 +5,6 @@ import '../../../core/models/vehicle.dart';
 import '../../../core/models/vehicle_event.dart';
 import '../../../core/models/recurring_obligation.dart';
 import '../../../core/models/record_type.dart';
-import '../../../data/demo_data.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../obligations/presentation/obligation_reminder_card.dart';
 import '../../obligations/presentation/obligation_setup_sheet.dart';
@@ -21,6 +20,7 @@ class DashboardPage extends StatefulWidget {
   const DashboardPage({
     super.key,
     required this.selectedVehicleId,
+    required this.vehicles,
     required this.onVehicleChanged,
     required this.obligations,
     required this.events,
@@ -31,6 +31,7 @@ class DashboardPage extends StatefulWidget {
   });
 
   final String selectedVehicleId;
+  final List<Vehicle> vehicles;
   final ValueChanged<String> onVehicleChanged;
   final List<RecurringObligation> obligations;
   final List<VehicleEvent> events;
@@ -52,11 +53,11 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   late final PageController _pageController;
 
-  int get _selectedIndex => DemoData.vehicles.indexWhere(
+  int get _selectedIndex => widget.vehicles.indexWhere(
     (vehicle) => vehicle.id == widget.selectedVehicleId,
   );
 
-  Vehicle get _selectedVehicle => DemoData.vehicles[_selectedIndex];
+  Vehicle get _selectedVehicle => widget.vehicles[_selectedIndex];
 
   @override
   void initState() {
@@ -98,14 +99,14 @@ class _DashboardPageState extends State<DashboardPage> {
                 height: 226,
                 child: PageView.builder(
                   controller: _pageController,
-                  itemCount: DemoData.vehicles.length,
+                  itemCount: widget.vehicles.length,
                   onPageChanged: (index) =>
-                      widget.onVehicleChanged(DemoData.vehicles[index].id),
+                      widget.onVehicleChanged(widget.vehicles[index].id),
                   itemBuilder: (context, index) => Padding(
                     padding: EdgeInsets.only(
-                      right: index < DemoData.vehicles.length - 1 ? 10 : 0,
+                      right: index < widget.vehicles.length - 1 ? 10 : 0,
                     ),
-                    child: VehicleHeroCard(vehicle: DemoData.vehicles[index]),
+                    child: VehicleHeroCard(vehicle: widget.vehicles[index]),
                   ),
                 ),
               ),
@@ -113,7 +114,7 @@ class _DashboardPageState extends State<DashboardPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  for (var i = 0; i < DemoData.vehicles.length; i++)
+                  for (var i = 0; i < widget.vehicles.length; i++)
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 220),
                       width: i == _selectedIndex ? 20 : 7,

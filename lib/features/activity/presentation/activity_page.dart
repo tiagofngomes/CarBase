@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/models/record_type.dart';
 import '../../../core/models/vehicle_event.dart';
-import '../../../data/demo_data.dart';
+import '../../../core/models/vehicle.dart';
 import '../../../shared/widgets/page_header.dart';
 import '../../dashboard/presentation/widgets/event_tile.dart';
 import '../../records/presentation/event_actions.dart';
@@ -12,11 +12,13 @@ class ActivityPage extends StatefulWidget {
   const ActivityPage({
     super.key,
     required this.events,
+    required this.vehicles,
     required this.onEventSaved,
     required this.onEventDeleted,
   });
 
   final List<VehicleEvent> events;
+  final List<Vehicle> vehicles;
   final ValueChanged<VehicleEvent> onEventSaved;
   final ValueChanged<VehicleEvent> onEventDeleted;
 
@@ -57,7 +59,7 @@ class _ActivityPageState extends State<ActivityPage> {
                 selected: _vehicleId == null,
                 onTap: () => setState(() => _vehicleId = null),
               ),
-              for (final vehicle in DemoData.vehicles)
+              for (final vehicle in widget.vehicles)
                 _FilterChip(
                   label: '${vehicle.displayName} · ${vehicle.associationLabel}',
                   selected: _vehicleId == vehicle.id,
